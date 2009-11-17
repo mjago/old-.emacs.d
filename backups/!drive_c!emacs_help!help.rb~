@@ -1,0 +1,38 @@
+
+class Help
+  @key_strokes = {
+    'cut' => 'C-w',
+    'copy' => 'm-w',
+q    'paste' => 'C-y',
+    'yank' => 'C-y',
+    'cut rest of line' => 'C-k'
+  }
+  def process_input
+    @key_input = STDIN.gets.chomp
+    check_for_exit
+    if exist? @key_input
+      STDOUT.puts key_stroke
+      STDOUT.flush
+    end
+  end
+  def exist?
+    if key_strokes.include? @key_input.downcase
+      true
+    else
+      false
+    end
+  end
+  def key_stroke
+    @key_stroke[@key_input]
+    def check_for_exit
+      exit 0 if (@key_input == 'q' || @key_input == 'Q')
+    end
+  end
+end
+
+h = Help.new
+loop do
+  h.process_input
+end
+
+

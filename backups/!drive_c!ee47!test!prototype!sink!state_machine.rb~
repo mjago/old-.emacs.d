@@ -1,0 +1,347 @@
+
+#    #    #    #    #    #    #    #    sink   #    #    #    #    #    #    #    #    
+
+require File.expand_path(File.join(File.dirname(__FILE__),'colour_command_line'))
+require File.expand_path(File.join(File.dirname(__FILE__),'log'))
+require File.expand_path(File.join(File.dirname(__FILE__),'zip_logs'))
+require File.expand_path(File.join(File.dirname(__FILE__),'timers'))
+require File.expand_path(File.join(File.dirname(__FILE__),'serial_comms'))
+
+class StateMachine
+  
+  attr_accessor :state, :messages
+  
+  def initialize
+    STDOUT.puts
+    STDOUT.puts "Initialising..."
+    STDOUT.puts
+    STDOUT.flush
+		@mode = :on # :continuous # :one_shot# 
+    @colour = ColourCommandLine.new
+    @pass_count = 0
+    @fail_count = 0
+    @no_response_count = 0
+    @test_count = 0
+		@serial = Serial_Comms.new
+		@serial.attach_to_port
+		@serial.read_timeout 10
+    @state = :init
+		@timers = Timers.new
+		@timers.add_timer :discoverable_timer
+		if @mode == :on
+      @timers.set_timer :discoverable_timer, 1.0
+    else  
+      @timers.set_timer :discoverable_timer, 30.0
+    end
+		@timers.add_timer :inquiry_timeout
+		@timers.set_timer :inquiry_timeout, 20.0
+		@timers.add_timer :send_delay
+		@timers.set_timer :send_delay, 1.0
+		@timers.add_timer :end_of_stream_delay
+		@timers.set_timer :end_of_stream_delay, 3.0
+		@timers.set_timer :send_delay, 1.0
+		@timers.add_timer :response_time
+		@timers.set_timer :response_time, 2.0
+		@timers.add_timer :archive_delay
+		@timers.set_timer :archive_delay, 60.0 # check for logs requiring archiving every 1 min
+		#~ @messages = Messages.new
+		
+    @log = Log.new('blue_giga_log')
+    
+    # pass_test_reset
+    
+		#~ @messages.add_message Message.new(
+			#~ :pass_test_reset,
+			#~ :reset, 
+			#~ nil, 
+			#~ [:accepted]
+		#~ )
+    #~ # pass_test_reset
+  end
+
+  def process
+		@commands = [
+			{
+				:send_message => 'resetting device',
+				:send_string => 'RESET',
+				:receive_message => 'device reset',
+				:receive_string => 'READY'
+			},{
+				:send_message => 'setting bt name',
+				:send_string => 'SET BT NAME Mary_Hare_Base_Unit',
+				:receive_message => 'BT name set',
+				:receive_string => 'SET BT NAME Mary_Hare_Base_Unit'
+			},{
+				:send_message => 'setting bt class to 001f00',
+				:send_string => 'SET BT CLASS 001f00',
+				:receive_message => 'BT class set',
+				:receive_string => 'SET BT CLASS 001f00'
+			},{
+				:send_message => 'setting BT AUTH',
+				:send_string => 'SET BT AUTH * 2.7182818284590',
+				:receive_message => 'BT AUTH set',
+				:receive_string => 'SET BT AUTH * 2.7182818284590'
+			},{
+				:send_message => 'setting BT IDENT',
+				:send_string => 'SET BT IDENT BT:47 f000 3.1.0 Bluegiga iWRAP',
+				:receive_message => 'BT IDENT set',
+				:receive_string => 'SET BT IDENT BT:47 f000 3.1.0 Bluegiga iWRAP'
+			},{
+				:send_message => 'setting BT LAP',
+				:send_string => 'SET BT LAP 9e8b33',
+				:receive_message => 'BT LAP set',
+				:receive_string => 'SET BT LAP 9e8b33'
+			},{
+				:send_message => 'setting BT PAGEMODE undiscoverable',
+				:send_string => 'SET BT PAGEMODE 2 2000 1',
+				:receive_message => 'BT PAGEMODE undiscoverable set',
+				:receive_string => 'SET BT PAGEMODE 2 2000 1'
+			},{
+				:send_message => 'setting BT PAIR',
+				:send_string => 'SET BT PAIR *',
+				:receive_message => 'BT PAIR set',
+				:receive_string => 'SET BT PAIR *'
+			},{
+				:send_message => 'setting BT POWER',
+				:send_string => 'SET BT POWER 8 8 8',
+				:receive_message => 'BT POWER set',
+				:receive_string => 'SET BT POWER 8 8 8'
+			},{
+				:send_message => 'setting BT ROLE',
+				:send_string => 'SET BT ROLE 0 f 7d00',
+				:receive_message => 'BT ROLE set',
+				:receive_string => 'SET BT ROLE 0 f 7d00'
+			},{
+				:send_message => 'setting BT SNIFF',
+				:send_string => 'SET BT SNIFF 0 20 1 8',
+				:receive_message => 'BT SNIFF set',
+				:receive_string => 'SET BT SNIFF 0 20 1 8'
+			},{
+				:send_message => 'setting CONTROL AUDIO',
+				:send_string => 'SET CONTROL AUDIO INTERNAL INTERNAL',
+				:receive_message => 'CONTROL AUDIO set',
+				:receive_string => 'SET CONTROL AUDIO INTERNAL INTERNAL'
+			},{
+				:send_message => 'setting CONTROL BAUD',
+				:send_string => 'SET CONTROL BAUD 115200,8n1',
+				:receive_message => 'CONTROL BAUD set',
+				:receive_string => 'SET CONTROL BAUD 115200,8n1'
+			},{
+				:send_message => 'setting SET CONTROL CD',
+				:send_string => 'SET CONTROL CD 00 0',
+				:receive_message => 'SET CONTROL CD set',
+				:receive_string => 'SET CONTROL CD 00 0'
+			},{
+				:send_message => 'setting secondary CONTROL CODEC',
+				:send_string => 'SET CONTROL CODEC SBC JOINT_STEREO 44100Hz 1',
+				:receive_message => 'secondary CONTROL CODEC set',
+				:receive_string => 'SET CONTROL CODEC SBC JOINT_STEREO 44100Hz 1'
+			},{
+				:send_message => 'setting primary CONTROL CODEC',
+				:send_string => 'SET CONTROL CODEC APT-X JOINT_STEREO 44100Hz 0',
+				:receive_message => 'primary CONTROL CODEC set',
+				:receive_string => 'SET CONTROL CODEC APT-X JOINT_STEREO 44100Hz 0'
+			},{
+				:send_message => 'setting CONTROL ECHO',
+				:send_string => 'SET CONTROL ECHO 7',
+				:receive_message => 'CONTROL ECHO set',
+				:receive_string => 'SET CONTROL ECHO 7'
+			},{
+				:send_message => 'setting CONTROL ESCAPE',
+				:send_string => 'SET CONTROL ESCAPE 43 00 1',
+				:receive_message => 'CONTROL ESCAPE set',
+				:receive_string => 'SET CONTROL ESCAPE 43 00 1'
+			},{
+				:send_message => 'setting CONTROL GAIN',
+				:send_string => 'SET CONTROL GAIN 8 8',
+				:receive_message => 'CONTROL GAIN set',
+				:receive_string => 'SET CONTROL GAIN 8 8'
+			},{
+				:send_message => 'setting CONTROL MICBIAS',
+				:send_string => 'SET CONTROL MICBIAS b 0',
+				:receive_message => 'CONTROL MICBIAS set',
+				:receive_string => 'SET CONTROL MICBIAS b 0'
+			},{
+				:send_message => 'setting CONTROL MSC DTE',
+				:send_string => 'SET CONTROL MSC DTE 00 00 00 00 00 00',
+				:receive_message => 'CONTROL MSC DTE set',
+				:receive_string => 'SET CONTROL MSC DTE 00 00 00 00 00 00'
+			},{
+				:send_message => 'setting CONTROL PREAMP',
+				:send_string => 'SET CONTROL PREAMP 1 1',
+				:receive_message => 'CONTROL PREAMP set',
+				:receive_string => 'SET CONTROL PREAMP 1 1'
+			},{
+				:send_message => 'setting CONTROL READY',
+				:send_string => 'SET CONTROL READY 00',
+				:receive_message => 'CONTROL READY set',
+				:receive_string => 'SET CONTROL READY 00'
+			},{
+				:send_message => 'setting CONTROL VREGEN',
+				:send_string => 'SET CONTROL VREGEN 1 00',
+				:receive_message => 'CONTROL VREGEN set',
+				:receive_string => 'SET CONTROL VREGEN 1 00'
+			},{
+				:send_message => 'setting PROFILE A2DP SINK',
+				:send_string => 'SET PROFILE A2DP SINK',
+				:receive_message => 'PROFILE A2DP SINK set',
+				:receive_string => 'SET PROFILE A2DP SINK'
+			},{
+				:send_message => 'setting PROFILE SPP off',
+				:send_string => 'SET PROFILE SPP off',
+				:receive_message => 'PROFILE SPP set',
+				:receive_string => 'SET PROFILE SPP off'
+			}
+		]
+			
+    loop do
+			
+      case @state
+
+			when :init
+			
+				@commands.each do |command|
+					@in_string = ''
+					puts " ...> #{command[:send_message]}"
+					@serial.send_string(command[:send_string])
+					loop do
+						temp_string = @serial.read_string
+						if temp_string  != nil
+							@in_string += temp_string 
+							#~ puts "returned message is => #{@in_string }"
+							if @in_string.include? command[:receive_string]
+								puts " <... #{command[:receive_message]}"
+								@state = :await_discoverable_mode
+								break
+							end
+						end
+					end
+				end
+        
+      when :await_discoverable_mode
+        if @timers[:discoverable_timer] == :expired # time to become discoverable !
+          @state = :switch_to_discoverable_mode
+        end
+        
+      when :switch_to_discoverable_mode
+          puts "  ---> setting base unit discoverable"
+          @serial.send_string("SET BT PAGEMODE 4 2000 1")
+          @state = :switch_to_discoverable_mode_response
+          
+      when :switch_to_discoverable_mode_response
+        @in_string = @serial.read_string
+        if @in_string != nil
+          if @in_string.include? 'SET BT PAGEMODE 4 2000 1'
+            puts "  ---> base unit now discoverable"
+            @state = :await_discovery
+          end
+        end
+      
+      when :await_discovery
+        @in_string = @serial.read_string
+        if @in_string != nil
+          if @in_string.include? "A2DP STREAMING START"
+            puts
+            puts "  !! A2DP streaming started !!"
+            puts
+            @state = :undiscoverable_mode
+          end  
+        end
+
+      when :undiscoverable_mode
+        puts "  ---> setting base unit to undiscoverable"
+        @serial.send_string("SET BT PAGEMODE 2 2000 1")
+        @state = :undiscoverable_mode_response
+          
+      when :undiscoverable_mode_response
+        @in_string = @serial.read_string
+        if @in_string != nil
+          if @in_string.include? 'SET BT PAGEMODE 2 2000 1'
+            puts "  ---> base unit now undiscoverable"
+            @state = :await_end_of_stream
+          end
+        end
+
+      when :await_end_of_stream
+        @in_string = @serial.read_string
+        if @in_string != nil
+          if @in_string.include? 'A2DP STREAMING STOP'
+            puts "  <--- stream terminated"
+            @timers.start_timer :end_of_stream_delay
+            if @mode == :on
+              @state = :end_of_stream_delay
+            else
+              @state = :reset
+            end              
+          end
+        end
+
+      when :end_of_stream_delay
+        if @timers[:end_of_stream_delay] == :expired
+          @state = :reset
+        end
+
+
+      else
+        puts "ERROR!! Unexpected state in StateMachine#process"
+        exit 1
+        
+      end
+    end  
+  end  
+end
+
+# run tests if run locally 
+
+#~ if $0 == __FILE__
+  #~ require 'tests/state_machine.tests'
+	#~ require 'messages'
+	#~ require 'message'
+	#~ require 'timers'
+	#~ require 'serial_comms'
+#~ end
+
+if $0 == __FILE__
+  puts "ARGV.inspect = #{ARGV.inspect}"
+  @sm = StateMachine.new
+  @sm.process
+  @sm = nil
+end
+
+#    #    #    #    #    #    #    #    sink   #    #    #    #    #    #    #    #    
+
+####################################### sink ###############################################################
+#                                                                                                          #
+# 				:send_string => 'RESET',                                                   #
+# 				:send_string => 'SET BT NAME Mary_Hare_Base_Unit',                         #
+# 				:send_string => 'SET BT CLASS 001f00',                                     #
+# 				:send_string => 'SET BT AUTH * 2.7182818284590',                           #
+# 				:send_string => 'SET BT IDENT BT:47 f000 3.1.0 Bluegiga iWRAP',            #
+# 				:send_string => 'SET BT LAP 9e8b33',                                       #
+# 				:send_string => 'SET BT PAGEMODE 2 2000 1',                                #
+# 				:send_string => 'SET BT PAIR *',                                           #
+# 				:send_string => 'SET BT POWER 8 8 8',                                      #
+# 				:send_string => 'SET BT ROLE 0 f 7d00',                                    #
+# 				:send_string => 'SET BT SNIFF 0 20 1 8',                                   #
+# 				:send_string => 'SET CONTROL AUDIO INTERNAL INTERNAL',                     #
+# 				:send_string => 'SET CONTROL BAUD 115200,8n1',                             #
+# 				:send_string => 'SET CONTROL CD 00 0',                                     #
+# 				:send_string => 'SET CONTROL CODEC SBC JOINT_STEREO 44100Hz 1',            #
+# 				:send_string => 'SET CONTROL CODEC APT-X JOINT_STEREO 44100Hz 0',          #
+# 				:send_string => 'SET CONTROL ECHO 7',                                      #
+# 				:send_string => 'SET CONTROL ESCAPE 43 00 1',                              #
+# 				:send_string => 'SET CONTROL GAIN 8 8',                                    #
+# 				:send_string => 'SET CONTROL MICBIAS b 0',                                 #
+# 				:send_string => 'SET CONTROL MSC DTE 00 00 00 00 00 00',                   #
+# 				:send_string => 'SET CONTROL PREAMP 1 1',                                  #
+# 				:send_string => 'SET CONTROL READY 00',                                    #
+# 				:send_string => 'SET CONTROL VREGEN 1 00',                                 #
+# 				:send_string => 'SET PROFILE A2DP SINK',                                   #
+# 				:send_string => 'SET PROFILE SPP off',                                     #
+# 				:send_string => 'SET BT PAGEMODE 4 2000 1',                                #
+#                                                                                                          #
+# when discovered...                                                                                       #
+#                                                                                                          #
+#         :send_string => 'SET BT PAGEMODE 2 2000 1'                                                       #
+############################################################################################################
+

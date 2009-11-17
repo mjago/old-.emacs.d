@@ -1,0 +1,65 @@
+
+def tertiary_monitor
+  def initialize
+    @tertiary_monitor_state.change_to :running
+  end
+
+  def state_machine
+    
+    @flags = get_flags
+    @frozen_tertiary_monitor_state = @tertiary_monitor_state.current
+    
+    case @frozen_tertiary_monitor_state
+      
+      #   #   #
+      
+    when :running
+      case @flags
+      when 000
+        # running - do nothing
+      when 001
+        # received sec enable off
+        timers[:pri_en_off_timer].start
+        tertiary_monitor_state.change_to :await_pri_en_off
+      else
+        tertiary_alarm! "unexpected power-off flags"
+      end
+      
+      #   #   #
+      
+    when :await_pri_en_off
+      case @flags
+      when 001
+        # still waiting!
+        if timers[:pri_en_off_timer].expired
+          tertiary_alarm! "pri enable off timer expired"
+        end
+      when 011
+        #received pri en off along with sec
+        timers[:pri_en_off_timer].stop
+        timers[:power_off_timer].start
+        tertiary_switch_off_states.change_to :power_off!
+      else
+        tertiary_alarm! "unexpected power-off flags"
+      end
+      
+      #   #   #
+      
+    when :power_off!
+      power_off!
+      tertiary_switch_off_states.change_to :verify_power_off
+      
+      #   #   #
+      
+    when :verify_power_off
+      if timers[:power_off_timer].expired
+        tertiary_alarm! "Power off time-out"
+      end
+      
+    else
+      tertiary_alarm! "unknown tertiary monitor state"
+    end
+  end
+end
+
+

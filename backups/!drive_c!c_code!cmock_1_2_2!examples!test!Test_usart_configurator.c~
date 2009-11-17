@@ -1,0 +1,8 @@
+#include "usart_configurator.h"
+#include AT91SAM7X256.h
+void usart_configure_usart_io(void)
+{
+  AT91C_BASE_PIOA->PIO_ASR = USART_TX_PIN;
+  AT91C_BASE_PIOA->PIO_BSR = 0;
+  AT91C_BASE_PIOA->PIO_PDR = USART_TX_PIN;
+}

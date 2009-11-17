@@ -1,0 +1,13 @@
+
+ class StateData
+   attr_reader :main_state_data
+
+   def self.main_state_data
+     [
+      [:init_state, :initialised!, :check_timers_state],
+      
+     ]
+   end
+
+ end
+

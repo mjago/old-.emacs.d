@@ -1,0 +1,20 @@
+#include "Unity.h"
+//#include "CMock.h"
+
+void setUp(void)
+{
+}
+void tearDown(void)
+{
+}
+
+void test_main_should_call_executer_init_and_call_executer_run_until_false(void)
+{
+  Executor_Init_Expect();
+  Executor_Run_ExpectAndReturn(TRUE);
+  Executor_Run_ExpectAndReturn(TRUE);
+  Executor_Run_ExpectAndReturn(TRUE);
+  Executor_Run_ExpectAndReturn(TRUE);
+  Executor_Run_ExpectAndReturn(FALSE);
+  main();
+}

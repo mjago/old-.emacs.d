@@ -1,0 +1,222 @@
+require "win32console"
+
+require File.expand_path(File.join(File.dirname(__FILE__),'spec_helper.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__),'..','lib','tertiary_state_machine.rb'))
+
+describe "MainStateMachine" do
+  main_state_machine = MainStateMachine.new
+	
+	it '.state should initialise to cold_boot_state' do
+		main_state_machine.state.should == :cold_boot_state
+	end
+end
+
+describe "StateMachines" do
+  sm = StateMachines.new
+
+  it 'should include state method' do
+    sm.methods.should include('state')
+  end	
+  it 'should include lifeline? method' do
+    sm.methods.should include('lifeline?')
+  end	
+  it 'should include status method' do
+    sm.methods.should include('status')
+  end	
+  it 'should include power_switch_pressed? method' do
+    sm.methods.should include('power_switch_pressed?')
+  end	
+  #~ it 'should include statuses array' do
+  #~ sm.instance_variables.should include('statuses')
+  #~ end	
+
+  it 'should be initialised to :cold_start' do
+    sm.state.should == :cold_start
+  end	
+
+  it 'should be able to set lifeline? bit to :factory_build' do
+    sm.lifeline?(:factory_build).should == :factory_build
+  end	
+  
+  it 'should be able to set lifeline? bit to :final_build' do
+    sm.lifeline?(:factory_build).should == :factory_build
+  end	
+  
+  it 'should cause exception if lifeline not final or factory state' do
+    lambda { sm.lifeline?(:void) }.should raise_error('impossible_lifeline_state')
+  end	
+  
+  it '.lifeline? should initially be :factory_build' do
+    sm.lifeline?.should == :factory_build
+  end	
+  
+  it '.power_switch_pressed? should be initially false' do
+    sm.power_switch_pressed?.should == false
+  end	
+  
+  it '.power_switch_pressed? should accept :pressed' do
+    sm.power_switch_pressed?(:pressed).should == true
+  end	
+  
+  it '.power_switch_pressed? should accept :released' do
+    sm.power_switch_pressed?(:released).should == false
+  end	
+  
+  it '.power_switch_pressed? should not accept :void' do
+    lambda { sm.power_switch_pressed?(:void) }.should raise_error('impossible_keypress')
+  end	
+  
+  #~ if '(statuses)'
+  
+  #~ it 'should inspect status
+end
+
+#~ describe "TertiaryColdStart" do
+#~ tcs = TertiaryColdStart.new
+
+#~ it 'should include state_machine method' do
+#~ tcs.methods.should include('state_machine')
+#~ end	
+
+#~ it 'initialize should initialize state to :init_cold_start_state' do
+#~ tcs.state_machine.state.should == :init_cold_start_state
+#~ end	
+
+#~ end
+
+
+#   it 'should have all required methods' do
+#     avc.methods.should include('hpricot_check')
+#     avc.methods.should include('check_connection')
+#     avc.methods.should include('get_file_names')
+#     avc.methods.should include('read_version')
+#     avc.methods.should include('strip_version')
+#     avc.methods.should include('new_version?')
+#     avc.methods.should include('read_latest_version_from_MPLAB_download_site')
+#     avc.methods.should include('read_latest_version_from_C18_download_site')
+#     avc.methods.should include('read_latest_version_from_ruby_download_site')
+#     avc.methods.should include('read_latest_version_from_rubygems_download_site')
+#     avc.methods.should include('read_latest_version_from_subversion_download_site')
+#     avc.methods.should include('read_latest_version_from_tortoiseSVN_download_site')
+#     avc.methods.should include('read_latest_version_from_winMerge_download_site')
+#     avc.methods.should include('read_latest_version_from_doxygen_download_site')
+#     avc.methods.should include('read_latest_version_from_graphviz_download_site')
+#     avc.methods.should include('fetch_latest_version_from_web')
+
+#     avc.methods.should include('compare_version')
+#   end
+
+#   it 'should have internet access' do
+#     avc.check_connection.should == '{emptyelem <meta content="text/html; charset=utf-8" http-equiv="content-type">}'
+#   end
+
+#   it 'should have access to network software directory' do
+#     File.exist?(
+#                 '\\\\Triteq-sbs\\data\\Design Projects\\Software\\version_monitored_apps\\Slik-Subversion-1.6.1-win32.msi').
+#       should == true
+#   end	
+
+#   it 'should be able to return file names from server' do
+#     avc.get_file_names.should ==
+#       [	"doxygen-1.5.9-setup.exe",
+#         "graphviz-2.22.2.msi",
+#         "MPLAB-C18-Upgrade-v3_30.exe",
+#         "MPLAB_8.30.zip",
+#         "ruby186-26.exe",
+#         "rubygems-1.3.3.zip",
+#         "Slik-Subversion-1.6.1-win32.msi", 
+#         "spec_output.html",
+#         "TortoiseSVN-1.6.1.16129-win32-svn-1.6.1.msi", 
+#         "version_check.log",
+#         "WinMerge-2.12.2-Setup.exe"
+#       ]	
+#   end
+
+#   it 'should extract version from string' do
+#     avc.strip_version('doxygen-1.5.9-setup.exe').should == '1.5.9'
+#     avc.strip_version('Slik-Subversion-1.6.1-win32.msi').should == '1.6.1-win32'
+#     avc.strip_version('TortoiseSVN-1.6.1.16129-win32-svn-1.6.1.msi').should == '1.6.1.16129-win32-svn-1.6.1'
+#     avc.strip_version('WinMerge-2.12.2-Setup.exe').should == '2.12.2'
+#     avc.strip_version('ruby186-26.exe').should == '186-26'
+#     avc.strip_version('rubygems-1.3.3.zip').should == '1.3.3'
+#     avc.strip_version('MPLAB-C18-Upgrade-v3_30.exe').should == 'v3_30'
+#     avc.strip_version('MPLAB_8.30.zip').should == '8.30'
+#     avc.strip_version('graphviz-2.22.2.msi').should == '2.22.2'
+#   end
+
+#   it '.strip_version should return nil if strip fails' do
+#     avc.read_version('rubbish').should == nil
+#   end
+
+#   it 'should read version' do
+#     avc.read_version('subversion').should == '1.6.1-win32'
+#     avc.read_version('tortoisesvn').should == '1.6.1.16129-win32-svn-1.6.1'
+#     avc.read_version('winmerge').should == '2.12.2'
+#     avc.read_version('ruby').should == '186-26'
+#     avc.read_version('rubygems').should == '1.3.3'
+#     avc.read_version('c18').should == 'v3_30'
+#     avc.read_version('mplab').should == '8.30'
+#     avc.read_version('doxygen').should == '1.5.9'
+#     avc.read_version('graphviz').should == '2.22.2'
+#   end
+
+#   it '.read_version should return nil if app name unrecognised' do
+#     avc.read_version('rubbish').should == nil
+#   end
+
+#   it 'should read latest version from subversion download page' do
+#     avc.read_latest_version_from_subversion_download_site.should == '1.6.1-win32'
+#   end
+
+#   it 'should read latest version from tortoise download page' do
+#     avc.read_latest_version_from_tortoiseSVN_download_site.should == '1.6.1.16129-win32-svn-1.6.1'
+#   end
+
+#   it 'should read latest version from ruby download page' do
+#     avc.read_latest_version_from_ruby_download_site.should == '186-26'
+#   end
+
+#   it 'should read latest version from rubygems download page' do
+#     avc.read_latest_version_from_rubygems_download_site.should == '1.3.3'
+#   end
+
+#   it 'should read latest version from C18 download page' do
+#     avc.read_latest_version_from_C18_download_site.should == 'v3_30'
+#   end
+
+#   it 'should read latest version from MPLAB download page' do
+#     avc.read_latest_version_from_MPLAB_download_site.should == '8.30'
+#   end
+
+#   it 'should read latest version from doxygen download page' do
+#     avc.read_latest_version_from_doxygen_download_site.should == '1.5.9'
+#   end
+
+#   it 'should read latest version from graphviz download page' do
+#     avc.read_latest_version_from_graphviz_download_site.should == '2.22.2'
+#   end
+
+#   it 'should fetch latest version from web' do
+#     avc.fetch_latest_version_from_web(:subversion).should == '1.6.1-win32'
+#     avc.fetch_latest_version_from_web(:tortoiseSVN).should == '1.6.1.16129-win32-svn-1.6.1'
+#     avc.fetch_latest_version_from_web(:winMerge).should == '2.12.2'
+#     avc.fetch_latest_version_from_web(:ruby).should == '186-26'
+#     avc.fetch_latest_version_from_web(:rubygems).should == '1.3.3'
+#     avc.fetch_latest_version_from_web(:C18).should == 'v3_30'
+#     avc.fetch_latest_version_from_web(:MPLAB).should == '8.30'
+#     avc.fetch_latest_version_from_web(:doxygen).should == '1.5.9'
+#     avc.fetch_latest_version_from_web(:graphviz).should == '2.22.2'
+#   end
+
+#   it 'should compare latest version with current version' do
+#     avc.compare_version(:subversion).should == true
+#     avc.compare_version(:tortoiseSVN).should == true
+#     avc.compare_version(:winMerge).should == true
+#     avc.compare_version(:ruby).should == true
+#     avc.compare_version(:rubygems).should == true
+#     avc.compare_version(:C18).should == true
+#     avc.compare_version(:MPLAB).should == true
+#     avc.compare_version(:doxygen).should == true
+#     avc.compare_version(:graphviz).should == true
+#   end
+# end

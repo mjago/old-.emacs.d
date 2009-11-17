@@ -1,0 +1,142 @@
+
+#include "../src/unity.h"
+
+#include <countdown.h>
+#include <defs.h>
+#include <defs_tft.h>
+#include <defs_debug.h>
+#include <hardware.h>
+#include <hardware_tft.h>
+#include <hardware_unit_test.h>
+#include <global_vars.h>
+#include <menuControl.h>
+#include <systemAlarm.h>
+#include <system.h>
+#include <stateMachineRoutines.h>
+#include <validateState.h>
+#include <keyboard.h>
+#include <tones.h>
+#include <cfr.h>
+#include <crc.h>
+#include <flash.h>
+#include <menu.h>
+#include <conversion.h>
+#include <setRate.h>
+#include <lcdconfirm.h>
+#include <flowCheck.h>
+#include <adc.h>
+#include <delays.h>
+#include <alarms.h>
+#include <backlight.h>
+#include <bolus.h>
+#include <calculations.h>
+#include <checkServiceHours.h>
+#include <check_fsr.h>
+#include <check_status.h>
+#include <check_timers.h>
+#include <config.h>
+#include <syringeData.h>
+#include <countdown.h>
+#include <infusion.h>
+#include <initialise.h>
+#include <interruptRoutines.h>
+#include <interrupts.h>
+#include <eoi.h>
+#include <neoi.h>
+#include <kvo.h>
+#include <logging.h>
+#include <occlusion.h>
+#include <power.h>
+#include <rtc.h>
+#include <serial.h>
+#include <startup.h>
+#include <syringe.h>
+#include <technician.h>
+#include <tests.h>
+#include <calculations.h>
+#include <timers.h>
+#include <initRegisters.h>
+#include <main.h>
+#include <stackChecks.h>
+#include <graphics.h>
+#include <graphics_tft.h>
+#include <version.h>
+#include <display_unit_test.h>
+
+void setTestValues(uchar state_timer, uchar main_state)
+{
+  initValidateState(main_state);
+	sysAlarmRef = NO_SYSTEM_ALARM_ERROR;
+	putFlowValue(FLOW_STATE);
+	_thisState = main_state;
+	change_main_state_to(main_state);
+	stateTimer = state_timer;
+}
+
+void setUp(void)
+{
+}
+
+void tearDown(void)
+{
+}
+
+void test_null_main_state(void)
+{
+  setTestValues(0, NULL_MAIN_STATE);
+
+  null_main_state();
+
+  //All of these should pass
+  TEST_ASSERT_EQUAL_HEX8(stateTimer, 0);			// Statetimer not changed
+  TEST_ASSERT_EQUAL_HEX8(INVALID_MAIN_STATE, sysAlarmRef);	// System alarm generated
+}
+
+// Check that with no timeout we dont change to any other state and that validity is setup correctly
+void test_start_state_no_change(void)
+{
+  setTestValues(0, START_STATE);					// Change main state to START_STATE
+
+  start_state();
+
+  TEST_ASSERT_EQUAL_HEX8(NO_SYSTEM_ALARM_ERROR, sysAlarmRef);	// No system alarm generated
+  TEST_ASSERT_EQUAL_HEX8(FLOW_STATE, flowLocation);			// Make sure that the code performs vState on START_STATE
+  TEST_ASSERT_EQUAL_HEX8(START_STATE, _thisState);			// Check for no state transition
+  TEST_ASSERT_EQUAL_HEX8(START_STATE, _c_mainState);		// Check for no state transition
+}
+
+void test_start_state_transition_to_NEW_INFUSION_DISPLAY_STATE(void)
+{
+  setTestValues(2, START_STATE);					// Change main state to NEW_INFUSION_DISPLAY_STATE by setting timeout to 2 (secs)
+
+  start_state();
+
+ 	TEST_ASSERT_EQUAL_HEX8(NO_SYSTEM_ALARM_ERROR, sysAlarmRef);
+  TEST_ASSERT_EQUAL_HEX8(FLOW_STATE, flowLocation);			// Make sure that the code performs vState on START_STATE
+  TEST_ASSERT_EQUAL_HEX8(START_STATE, _thisState);
+  TEST_ASSERT_EQUAL_HEX8(NEW_INFUSION_DISPLAY_STATE, _c_mainState);// Check for no state transition
+}
+
+void test_putCharCFR(void)
+{
+
+// NOTE: ONLY testing real part of putCharCFR at this stage !!
+	putCharCFR(& _c_mainState, 1);
+	TEST_ASSERT_EQUAL_HEX8(_c_mainState, 1);
+	putCharCFR(& _c_mainState, 2);
+	TEST_ASSERT_EQUAL_HEX8(_c_mainState, 2);
+	putMainState(0xFF);
+	TEST_ASSERT_EQUAL_HEX8(_c_mainState, 0xFF);
+	putDigit(0x55);
+	TEST_ASSERT_EQUAL_HEX8(_c_digit, 0x55);
+}
+void test_change_main_state_to(void)
+{
+	stateTimer = 0xFF;
+	change_main_state_to(NEW_INFUSION_INPUT_STATE);
+	TEST_ASSERT_EQUAL_HEX8(_c_mainState, NEW_INFUSION_INPUT_STATE);
+	TEST_ASSERT_EQUAL_HEX8(stateTimer, 0);
+	change_main_state_to(WARNING_STATE);
+	TEST_ASSERT_EQUAL_HEX8(_c_mainState, WARNING_STATE);
+	TEST_ASSERT_EQUAL_HEX8(stateTimer, 0);
+}

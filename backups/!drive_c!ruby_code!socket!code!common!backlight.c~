@@ -1,0 +1,241 @@
+
+#ifndef TEST
+  #include <p18f8720.h>
+#endif
+
+#include "backlight.h"
+#include <global_vars.h>
+#include <cfr.h>
+#include <defs.h>
+#include <display.h>
+#include <flowCheck.h>
+#include <flash.h>
+#include <hardware.h>
+//
+#pragma code
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * initBackLight() initialises the LCD backlight. The backlight is turned ON and backLight flag is SET.
+  */
+
+void initBackLight(void)
+  {
+  flowCheck(FLOW_INIT_BACKLIGHT);
+
+  CCPR1L = 255;                                     // prepare for next fade down
+  LATCH_BACK_LIGHT_PIN_ON;                          // Latch backlight pin on
+  BACK_LIGHT_PWM_OFF;                               // ensure pwm off
+  putBackLightFade(FALSE);                          // indicate not fading
+  putBackLight(TRUE);                               // Indicate backlight on
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * backLightOn() initiates the turning on of the display. backLightFade flag is set to TRUE (fading), and blFadeUp flag is set to TRUE (fading up).
+  * PWM is turned ON.
+  */
+
+void backLightOn(void)
+  {
+    
+  #ifndef SDL_SIMULATION
+  
+    #ifdef GIANTPLUS_TFT_LCD
+    
+      #ifdef DISPLAY_USE_INVERSION
+    
+	      displayInversionOff();
+	    
+      #endif // DISPLAY_USE_INVERSION
+	    
+    #endif // GIANTPLUS_TFT_LCD 
+    
+  #endif // SDL_SIMULATION
+
+  putBackLightFade(TRUE);
+  putBlFadeUp(TRUE);
+  BACK_LIGHT_PWM_ON;                                // turn on pwm
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * backLightDim() alters the pwm driving the backlight to reduce the display brightness to dim (low power).
+  * The suitable PWM value is returned by readLCDBacklightValue(). Thsi value is determined during calibration.
+  * The backLight flag, backLightFade flag, andBlFadeUp flag are reset.
+  */
+
+void backLightDim(void)
+  {
+    
+  #ifndef SDL_SIMULATION
+  
+    #ifdef GIANTPLUS_TFT_LCD
+    
+      #ifdef DISPLAY_USE_INVERSION
+    
+	      displayInversionOn();
+	    
+      #endif // DISPLAY_USE_INVERSION
+	    
+    #endif // GIANTPLUS_TFT_LCD 
+    
+  #endif // SDL_SIMULATION
+
+  CCPR1L = readLCDBacklightValue();
+  CCP1CON = 0x0F;
+  LATCH_BACK_LIGHT_PIN_OFF;
+  putBackLight(FALSE);
+  putBackLightFade(FALSE);
+  putBlFadeUp(FALSE);
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * backLightOff() turns off the backlight (very low power). The display is unreadable following this call.
+  * The backLight flag is reset. backLightFade flag is set and BlFadeUp is reset (DOWN).
+  * PWM is turned OFF.
+  */
+
+void backLightOff(void)
+  {
+    
+  #ifndef SDL_SIMULATION
+  
+    #ifdef GIANTPLUS_TFT_LCD
+    
+      #ifdef DISPLAY_USE_INVERSION
+    
+	      displayInversionOn();
+	    
+      #endif // DISPLAY_USE_INVERSION
+	    
+    #endif // GIANTPLUS_TFT_LCD 
+    
+  #endif // SDL_SIMULATION
+
+  CCPR1L = 255;
+  putBackLight(FALSE);
+  putBackLightFade(TRUE);
+  putBlFadeUp(FALSE);
+  BACK_LIGHT_PWM_OFF;
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * fadeBackLight() checks the backlight PWM and if during a fade, determines whether the fade has finished.
+  * Each time around the main loop backLightFade flag is tested, and if SET fadeBackLight is called.
+  * Fade direction  is governed by the BlFadeUp flag (TRUE = fade brighter).
+  * Fade up and fade down speeds are different - FADE_UP_RATE and FADE_DOWN_RATE.
+  * The actual PWM fade is done in TIMER.asm
+  */
+
+void fadeBackLight(void)
+  {
+  static uchar fadeRate;
+    
+  #ifndef SDL_SIMULATION
+  
+    #ifdef GIANTPLUS_TFT_LCD
+    
+      #ifdef DISPLAY_USE_INVERSION
+    
+	      displayInversionOff();
+	    
+      #endif // DISPLAY_USE_INVERSION
+	    
+    #endif // GIANTPLUS_TFT_LCD 
+    
+  #endif // SDL_SIMULATION
+
+  if(getBlFadeUp())
+    {
+    fadeRate = FADE_UP_RATE;
+    }
+  else
+    {
+    fadeRate = FADE_DOWN_RATE;
+    }
+
+  if(getBlFadeUp())
+    {
+    BACK_LIGHT_PWM_ON;
+    if(CCPR1L >= (255 - fadeRate))                  // Actual fade done in Timer.asm
+      {
+      CCPR1L = 255;                                 // prepare for next fade down
+      putBackLightFade(FALSE);                      // indicate no longer fading
+      putBackLight(TRUE);                           // Indicate backlight on
+      LATCH_BACK_LIGHT_PIN_ON;                      // Latch backlight pin high
+      BACK_LIGHT_PWM_OFF;                           // Turn off backlight pwm
+      }
+    }
+  else                                              // Fade down...
+    {
+    putBackLight(FALSE);                            // Indicate backlight off or partially off
+    if(CCPR1L<=FADE_DOWN_RATE)                      // Actual fade done in Timer.asm
+      {
+      CCPR1L = 0x0;
+      LATCH_BACK_LIGHT_PIN_OFF;
+      BACK_LIGHT_PWM_OFF;
+      putBackLightFade(FALSE);
+      }
+    }
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * fastBackLightOn() turns the back light on instantly, avoiding the fade mechanism, and is called by safety routines, and alarms.
+  */
+
+void fastBackLightOn(void)
+  {
+    
+  #ifndef SDL_SIMULATION
+  
+    #ifdef GIANTPLUS_TFT_LCD
+    
+      #ifdef DISPLAY_USE_INVERSION
+    
+	      displayInversionOff();
+	    
+      #endif // DISPLAY_USE_INVERSION
+	    
+    #endif // GIANTPLUS_TFT_LCD 
+    
+  #endif // SDL_SIMULATION
+
+  LATCH_BACK_LIGHT_PIN_ON;                          // Latch backlight pin high
+  putBackLight(TRUE);                               // Indicate backlight on
+  CCPR1L = 255;                                     // prepare for next fade down
+  putBackLightFade(FALSE);                          // indicate no longer fading
+  BACK_LIGHT_PWM_OFF;
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup display
+  * checkToDimBacklight() determines whether it is time to dim the back light when the backlight is on. If backlight is switched to
+  * always on (in system menu) the backlight is never dimmed.
+  */
+
+void checkToDimBacklight(void)
+{
+  if(getBLightFixedOn() == FALSE)                   // If backlight is not permanently on...
+  {
+    if(idleTimer >= ((systemVars[0]+1) * 4))
+    {
+      backLightDim();
+      idleTimer=0;
+    }
+  }
+}
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+#pragma code

@@ -1,0 +1,5 @@
+#-*- require-final-newline: nil -*-
+#contributor: gary <ge.iams@gmail.com>
+#name : climb_to
+# --
+before { @s.climb_to :${1:state} }

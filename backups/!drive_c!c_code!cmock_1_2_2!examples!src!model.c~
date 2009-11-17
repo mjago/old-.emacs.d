@@ -1,0 +1,8 @@
+#ifndef _ADCCONDUCTOR_H
+#define _ADCCONDUCTOR_H
+
+void software_init(void);
+void conductor_Init(void);
+  
+
+#endif // _ADCCONDUCTOR_H

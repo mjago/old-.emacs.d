@@ -1,0 +1,9 @@
+require 'rubygems'
+require 'watchr'
+
+watch("spec/*.*_spec.rb") do |sm|
+  #sm.gsub!('state_spec','state_machine')
+  STDOUT.puts "drawing #{sm.to_s.gsub('state_spec','state_machine')}"
+  STDOUT.puts system("ruby state/draw_state_machine.rb #{sm.to_s.gsub('state_spec','state_machine')}")
+end
+

@@ -1,0 +1,522 @@
+
+#ifndef TEST
+
+  #include "p18f8720.h"
+
+#else // TEST
+
+//  #include "inttypes.h"
+
+#endif // TEST
+
+#include "defs.h"
+#include "global_vars.h"
+#include "adc.h"
+#include "cfr.h"
+#include "infusion.h"
+#include "flowCheck.h"
+#include "systemAlarm.h"
+#include "setRate.h"
+#include "config.h"
+#include "flash.h"
+#include "logging.h"
+#include "serial.h"
+#include <delays.h>
+#include "stateMachineRoutines.h"
+#include "alarms.h"
+#include "hardware.h"
+
+#pragma code
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * reload() is called to calculate the motor drive parameters such as reloadValue, tmr1Prescale etc.
+  * This routine is called to calculate motor drive parameters for the rate required. In
+  * addition the relevant hysteresis values are loaded, and the motor drive chip is reset.
+  */
+
+void reload(void)
+  {
+  static union unionInt localReloadValue;
+  static uint tmr1PreScale;
+  static float ml_per_sec;
+  float steps_per_ml;
+  float steps_per_sec;
+  float step_count_value;
+
+  if( reload_rate >= 200.01 ||
+      reload_rate  <= 0.09  )
+    {
+    systemAlarm(RELOAD_RATE_ERROR);
+    }
+
+  tmr1PreScale=1;                                           // initial prescale value
+
+  ml_per_sec = reload_rate / 3600.0;
+
+  _c_ml_per_hsec = reload_rate / 360000.0;                  // need hml/hsec for regular calc_hml_expected() calculation
+  _i_ml_per_hsec = reload_rate / 360000.0;
+
+  _c_hmm_per_hsec = (float) (ml_per_sec * get_hmm_per_ml() * 0.01); // hmm/ml * ml/sec * 1/100 = hmm/hsec ~ used by feedback mechanism)
+  _i_hmm_per_hsec = (float) (ml_per_sec * get_hmm_per_ml() *  0.01 );
+
+  invert_float(& _i_ml_per_hsec);
+  invert_float(& _i_hmm_per_hsec);
+
+  steps_per_ml = get_steps_per_hmm() * ((float)get_hmm_per_ml()); // get steps per ml into float
+
+  steps_per_sec = ml_per_sec * steps_per_ml;                // Calculate step frequency ml/sec * steps/ml = steps/sec
+
+#if !defined DISABLE_MOTOR_FEEDBACK
+	#if defined TRUE_MICROSTEPPING
+		steps_per_sec *= 8.0;																			// full microstepping perofrmed so need to pulse 8 times
+	#else
+	  steps_per_sec *= 2.0;                                     // half period (double frequency) to allow for add_steps / miss_steps control
+	#endif
+#endif
+
+  step_count_value = (float) 4915200.0/steps_per_sec;
+
+  tmr1PreScale +=(uint)(step_count_value / 65535.0);
+
+  step_count_value = step_count_value / (float)tmr1PreScale;
+
+  putTmr1PreScaleVal(tmr1PreScale);                       // Store tmr1PrescaleValue
+  putTmr1PreScaleCount(tmr1PreScale);                     //  & Initialise PrescaleCount
+
+  localReloadValue.it = (uint) (step_count_value + 0.5);
+
+  localReloadValue.it=0xffff - localReloadValue.it;
+
+  TMR1H=localReloadValue.cha[1];
+  TMR1L=localReloadValue.cha[0];
+
+  _c_tmr1Reload = localReloadValue.it;
+  _i_tmr1Reload = ~ localReloadValue.it;
+
+  sendSecondary(SEC_RATE_CHANGE);
+
+  MOTOR_RESET(FALSE);                                // Reset Motor Chip...
+  motorWake(TRUE);
+  MOTOR_RESET(TRUE);
+  SETMOTORSTEPS_EIGHTH_STEP;                       // Set for eighth step microstepping
+
+  if(_c_rate_value <= 1.0)                        // If new rate is less than or equal to 1ml...
+    {
+    putHiCtrlHysteresis(HI_CONTROL_HYSTERESIS_1);   // Load appropriate hysteresis values to hysteresis variables
+    putLoCtrlHysteresis(LO_CONTROL_HYSTERESIS_1);
+    }
+  else if(_c_rate_value <= 10.0)                  // If new rate is between 1.1ml and 10ml...
+    {
+    putHiCtrlHysteresis(HI_CONTROL_HYSTERESIS_1_10);// Load appropriate hysteresis values to hysteresis variables
+    putLoCtrlHysteresis(LO_CONTROL_HYSTERESIS_1_10);
+    }
+  else if(_c_rate_value <= 100.0)                 // If new rate is between 10.1ml and 100ml...
+    {
+    putHiCtrlHysteresis(HI_CONTROL_HYSTERESIS_10_100); // Load appropriate hysteresis values to hysteresis variables
+    putLoCtrlHysteresis(LO_CONTROL_HYSTERESIS_10_100);
+    }
+  else if(_c_rate_value <= 200.0)                 // If new rate is between 100.1ml and 200ml...
+    {
+    putHiCtrlHysteresis(HI_CONTROL_HYSTERESIS_100_200); // Load appropriate hysteresis values to hysteresis variables
+    putLoCtrlHysteresis(LO_CONTROL_HYSTERESIS_100_200);
+    }
+
+  putFreeWheelCount(NO_CONTROL_COUNT);              // Indicate initial freewheel period (No of Steps)
+  if(getAllowReload() == FALSE)                     // Final check on permission to reload infusion values
+    {
+    systemAlarm(ALLOW_RELOAD_FLAG_UNSET);
+    }
+  putAllowReload(FALSE);
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * startInfusion() is called when an infusion is started.
+  * The motor chip is reset, various test paramters are reset, the start of infusion set up,
+  * and timer1 enabled to start infusion.
+  */
+
+void startInfusion(void)
+  {
+  putAllowReload(TRUE);                             // Give notice of intention to change reload value
+  carriageErrorPeriod = 0;
+  reverseErrorPeriod = 0;
+  VICalcErrorPeriod = 0;
+  temp30Min = 0;
+  initialisePressureFilter();
+
+#ifdef displayPositions
+	maxDiff = 0;
+#endif
+
+  if(getStartEnable() == FALSE)
+    {
+    systemAlarm(START_INFUSION_NOT_START_ENABLED);
+    }
+
+  MOTOR_RESET(FALSE);                                // Reset Motor Chip...
+
+  is_main_menu_enabled[LOAD_POSITION] = FALSE;
+  is_main_menu_enabled[SET_RATE_POSITION] = TRUE;
+  is_main_menu_enabled[START_HOLD_POSITION] = TRUE;
+  is_main_menu_enabled[PURGE_BOLUS_POSITION] = TRUE;
+  is_main_menu_enabled[OPTIONS_POSITION] = FALSE;
+  is_main_menu_enabled[POWER_OFF_POSITION] = FALSE;
+
+  motorWake(TRUE);
+  MOTOR_RESET(TRUE);                                	// Reset Motor Chip...
+  SETMOTORSTEPS_EIGHTH_STEP;                       		// Set for eighth step microstepping
+
+///////////////////////////////////////////////////////////testing
+#ifdef outputSensorsViaIRDA
+///////////////////////////////////////////////////////////testing
+#else
+  disableTechInterrupts();                          // Disable tech RX interrupts when running
+#endif
+
+  reload_rate = _c_rate_value;                      // reload motor parameters at given rate
+  reload();
+
+  putTimer1Enabled(TRUE);
+  PIR1bits.TMR1IF=0;                                // clear timer 1 interrupt flag
+
+  if(_c_motor_state == FORWARD_STATE)
+    {
+    systemAlarm(UNEXPECTED_MOTOR_STATE);
+    }
+
+  if(getAllowStartFlag() == FALSE)
+    {
+    systemAlarm(ALLOW_START_FLAG_UNSET);
+    }
+
+  setValues();
+  sendSecondary(SEC_CONFIG);
+  putWaitConfigAck(TRUE);
+  sendSecondary(SEC_OPERATIONAL_TEST);              // send change of status to secondary
+  writeLog(LOG_START_DISPENSE);
+
+  PIE1bits.TMR1IE=1;                                // enable timer 1 interrupt
+  T1CONbits.TMR1ON=1;                               // enable timer 1
+  putAllowStartFlag(FALSE);
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * stopInfusion() is called to stop an infusion.
+  * stopInfusion stops timer1, disables timer1 interrupts, updates serviceHours, and updates staticPosition if relevant.
+  */
+
+void stopInfusion(void)
+  {
+
+  putAllowStartConfirm(FALSE);
+  putWaitStartConfirm(FALSE);
+
+  save_tvi_to_flash();
+
+#ifdef PRESSURE_FAIL_CHECK
+	putPressureSystemCheck(FALSE);
+#endif
+
+
+  if(getInfusingBolus() == TRUE)                    // Were we infusing a bolus?
+    {
+    stopBolus();                                    // Yes - so reset infusion vars!
+    _c_infusedBolus = 0;                            // Reset infused bolus
+    _i_infusedBolus = 0xFFFF;
+    }
+
+  motorWake(FALSE);
+  T1CONbits.TMR1ON=0;                               // disable timer 1
+  PIE1bits.TMR1IE=0;                                // disable timer 1 interrupt
+  PIR1bits.TMR1IF=0;                                // clear timer 1 interrupt flag
+  putTimer1Enabled(FALSE);                          // Disable timer 1 s/ware switch
+
+  if( LID_SHUT && _c_infusionReadyState == RATE_SET_LOADED)
+      {
+      change_run_state_to(PAUSED_STATE);
+      }
+  else
+      {
+      change_run_state_to(STOPPED_STATE);
+      }
+
+  sendSecondary(SEC_OPERATIONAL_TEST);              // send change of status to secondary
+  writeServiceHours();                              // Write service hours to flash
+  writeLog(LOG_STOP_DISPENSE);                      // Write to log
+  enableTechInterrupts();                           // Enable tech RX interrupts since not running
+  delay125mSec();                                   // ensure any movement in carriage has subsided
+
+	resume_carriage_pos = getCarriagePos();           // store current carriage position for possible syringe replacement test
+
+  if(getHoldStaticPos() == FALSE)                   // If we have previously had a switch or lid fault don't update static position...
+    {
+    staticPosition = getCarriagePos();              // Store static position for future detection of possible syringe change
+    }
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * resetInfusion() resets infusion variables ready for a new infusion.
+  */
+
+void resetInfusion(void)
+  {
+
+  putVI(0);
+  oldVI = 0;
+  refTVI = 0 ;                                      // Reset userVIref. This is then used against VI to calculate userVI increases
+
+  putMissStep(FALSE);
+  putAddStep(FALSE);
+
+  _c_infusing_hsecs = 0;                             // Reset totalInfusingSecs
+  _i_infusing_hsecs = (ulong) 0xFFFFFFFF;
+
+  putInfusedBolus(0);
+
+  hmm_expected = 0;
+  putMMPool(0);
+  put_hmm_travelled(0);
+
+  hml_expected = 0;
+  mlPool = 0;                                       // clear hml_expected repository
+
+  put_hml_infused(0);
+
+  _c_startPosition = _c_carriagePos;                // startPosition = carriagePosition
+  _i_startPosition = _i_carriagePos;
+
+  _c_startVolume = 0;                               // Reset startVolume
+  _i_startVolume = 0xFFFF;
+
+  MOTOR_DIRECTION = FORWARD;                              // Ensure direction is set to FORWARD
+
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * startBolus() instigates the change of infusion rate to initiate a bolus infusion at the bolus rate.
+  */
+
+void startBolus(void)
+  {
+  putAllowReload(TRUE);                             // Give notice of intention to change reload value
+  putInfusingBolus(TRUE);                           // Indicate infusing bolus
+  updatePools();                                    // Update mm / ml pools, startPosition, and reset infusingTSecs
+  reload_rate = (float)getMaxRate()/100.0;
+  reload();                                         // Recalculate infusion variables
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * stopBolus() is called to stop the current bolus.
+  */
+
+void stopBolus(void)
+  {
+  putAllowReload(TRUE);                             // Give notice of intention to change reload value
+  putInfusingBolus(FALSE);
+  reload_rate = _c_rate_value;
+  updatePools();                                    // Update mm / ml pools, startPosition, and reset infusingTSecs
+	recalculate_countdown();
+  reload();
+  writeLog(LOG_BOLUS_DOSE);
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * checkBolus() is called each time around the main loop, to check infusedBolus level (where a bolus
+  * is being administered). If the maximum bolus allowance has been given the routine stops the bolus infusion.
+  */
+
+void checkBolus(void)
+  {
+  flowCheck(FLOW_CHK_BOLUS);
+  if(getInfusingBolus() == TRUE)
+    {
+    putInfusedBolus(getVI() - getBolusStartVolume());
+
+    if(getInfusedBolus() >= ((uint)(getBolusVolume())*10))			// hmm
+      {
+      stopBolus();
+      }
+    }
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * check_infusion_progress() is called each time around the main loop and checks for the End of Infusion point having
+  * been reached. If it has the routine endOfInfusion() is called.
+  */
+
+void check_infusion_progress(void)
+  {
+  flowCheck(FLOW_CHECK_INFUSION_PROGRESS);
+  switch(_c_motor_state)
+    {
+    case FORWARD_STATE:
+      switch(_c_runState)
+        {
+        case RUNNING_STATE:
+          if(is_neoi_point_reached() == TRUE)
+            {
+            if(_c_neoiState != NEOI_WARNING_STATE)
+              {
+  	          check_for_active_bat_warning();
+              change_warning_state_to(NEOI_WARNING_ACTIVE_STATE);
+              }
+            }
+          break;
+        case NEOI_STATE:
+          if(is_eoi_point_reached() == TRUE)
+            {
+						check_for_active_bat_warning();
+            change_warning_state_to(EOI_WARNING_ACTIVE_STATE);
+            }
+          break;
+        default:
+          break;
+        }
+      if(is_end_of_syringe_reached() == TRUE)
+        {
+        putSyringeEmpty(TRUE);
+        }
+      break;
+    case REVERSE_STATE:
+    case STOPPED_STATE:
+      break;
+    default:
+      systemAlarm(UNEXPECTED_MOTOR_STATE);
+    }
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * updatePools() is called to save infusion measurement variables.
+  * mmTravelled and hml_expected are saved, startPosition is updated to current carriagePos
+  * and infusingTSecs is reset to zero.
+  */
+
+void updatePools(void)
+  {
+  _c_mmPool = _c_hmm_travelled;                       // Save current _hmm_travelled to MMPool
+  _i_mmPool = _i_hmm_travelled;
+
+  mlPool = getVI();																	// Update mlPool
+
+  _c_startPosition = _c_carriagePos;                // Reset startposition
+  _i_startPosition = _i_carriagePos;
+
+  _c_infusing_hsecs = 0;
+  _i_infusing_hsecs = (ulong) 0xFFFFFFFF;
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * calc_bolus_hmm_limit() calculates the bolus limit in hundreths of mm.
+  */
+
+void calc_bolus_hmm_limit(void)
+  {
+  _c_bolus_hmm_limit = (uint)(get_hmm_per_ml() * 0.6);
+  _i_bolus_hmm_limit = (uint)(get_hmm_per_ml() * 0.6);
+  _i_bolus_hmm_limit = ~ _i_bolus_hmm_limit;
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * is_neoi_point_reached() tests to see if the neoi point has been reached. The routine returns TRUE if
+  * NEOI has been reached, else FALSE is returned.
+  */
+
+uchar is_neoi_point_reached(void)
+  {
+  if(_c_carriagePos >= _c_NEOIPoint)
+    {
+    return TRUE;
+    }
+  return FALSE;
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * is_eoi_point_reached() tests to see if the end-of-infusion point has been reached. The routine returns TRUE if
+  * EOI has been reached, or if countdown has reached 0, whichever is first (the difference will be within the allowable tolerence.
+  * FALSE if not reached.
+  */
+
+uchar is_eoi_point_reached(void)
+  {
+  if(_c_carriagePos >= _c_EOIPoint)
+    {
+    if(_c_carriagePos >= _c_EOIPoint + 200)           // Check for non-processing of eoi
+      {
+      if(_c_motor_state != OFF_STATE)
+        {
+        if(_c_runState != EOI_STATE)
+          {
+          systemAlarm(UNHANDLED_EOI_ERROR);
+          }
+        }
+      }
+    return TRUE;
+    }
+  if( (_c_countDownSecs == 0) &&                      // If countdown equal to 0:0:0 ...
+      (_c_countDownMins == 0) &&
+      (_c_countDownHours == 0))
+    {
+    return TRUE;
+    }
+  return FALSE;
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * is_end_of_syringe_reached() tests for end of syringe. The routine returns TRUE if
+  * end of syringe has been reached, FALSE if otherwise.
+  */
+
+uchar is_end_of_syringe_reached(void)
+  {
+  if(_c_carriagePos >= _c_syringeData.end)
+    {
+    return TRUE;
+    }
+  return FALSE;
+  }
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/** \ingroup control
+  * processInfusionProgressFlag() is called during rate setting where an up or down key is pressed.
+  * If infusionProgressState is INFUSION_STARTED_STATE and time is modified in TIMED rate mode,
+  * change infusionProgressState to INFUSION_FINISHED_STATE to allow the modification to rate.
+  */
+
+void processInfusionProgressFlag(void)
+  {
+  if(_c_new_set_rate_mode == TIMED_MODE)
+    {
+    if(_c_infusionProgressState == INFUSION_STARTED_STATE)
+      {
+      change_infusion_progress_state_to(INFUSION_FINISHED_STATE);
+      }
+    }
+  }
+
+#pragma code

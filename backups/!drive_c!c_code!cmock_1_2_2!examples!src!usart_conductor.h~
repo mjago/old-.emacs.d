@@ -1,0 +1,8 @@
+#ifndef _USART_CONFIGURATOR_H
+#define _USART_CONFIGURATOR_H
+
+#define USART_TX_PIN 1
+
+void usart_configure_usart_io(void);
+
+#endif // _USART_PUTCHAR_H

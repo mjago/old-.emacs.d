@@ -1,0 +1,75 @@
+#include "p16f684.inc"
+#include "macros.inc"
+#include "initialise.inc"
+
+	extern 	testHarnessInfinite
+	extern 	testHarness
+  global interrupt
+	extern _c_hundredMsec
+	extern _i_hundredMsec
+
+interrupt_UDATA UDATA
+
+w_temp 						res 1
+status_temp 			res 1
+	
+	global w_temp
+	global status_temp
+	
+interrupt_CODE CODE
+
+interrupt
+	
+	movwf	w_temp 								;Copy W to TEMP register
+	swapf STATUS,W 							;Swap status to be saved into W 
+															;Swaps are used because they do not affect the status bits
+	movwf  status_temp        	;Save status to bank zero STATUS_TEMP register
+	
+	bank0
+	btfsc PIR1, TMR1IF
+	goto timer1_interrupt
+	btfsc INTCON, INTF
+	goto UPSW_interrupt
+	btfsc INTCON, RAIF
+	goto power_switch_interrupt
+	goto unrecognised_interrupt
+	
+timer1_interrupt
+	
+	bank0
+	movlw Timer1_H_Value
+	movwf TMR1H 
+	movlw Timer1_L_Value
+	movwf TMR1L 
+	bcf PIR1, TMR1IF
+	incf _c_hundredMsec, F
+	bank1
+	decf _i_hundredMsec, F
+	bank0
+	goto interrupt_exit
+
+UPSW_interrupt
+	bank0
+	bcf INTCON, INTF
+	goto interrupt_exit
+
+power_switch_interrupt
+	bank0
+	subwf PORTA, W
+	bcf INTCON, RAIF
+	goto interrupt_exit
+
+
+interrupt_exit
+	swapf status_temp,W      		;Swap STATUS_TEMP register into W 
+															;(sets bank to original state)
+	movwf  STATUS 							;Move W into STATUS register
+	swapf  w_temp,F 						;Swap w_temp
+	swapf  w_temp,W 						;Swap w_temp into W
+	retfie
+	
+unrecognised_interrupt
+
+	goto unrecognised_interrupt
+		
+	end

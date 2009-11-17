@@ -1,0 +1,246 @@
+# Require the WIN32OLE library
+require 'win32ole'
+
+@data = []
+	#~ ['hot water','failure of water heater'],
+	#~ ['','failure of sterile connector'],
+	#~ ['cold water','failure of water heater'],
+	#~ ['','failure of sterile connector']
+#~ ]
+
+def hazard(*h)
+	if h.size < 2
+		puts 'ERROR! hazard needs a cause'
+		exit 1
+	end	
+	@hazard = h[0]
+	h.delete_at(0)
+	@data.push [@hazard,h[0]]
+	h.delete_at(0)
+	h.each do |x|
+		@data.push ['',x]
+	end	
+end
+
+def write_to_spreadsheet(name)
+	#puts @data.inspect
+	# Create an instance of the Excel application object
+	xl = WIN32OLE.new('Excel.Application')
+	# Make Excel visible
+	xl.Visible = 1
+	# Add a new Workbook object
+	wb = xl.Workbooks.Add
+	# Get the first Worksheet
+	ws = wb.Worksheets(1)
+	# Set the name of the worksheet tab
+	ws.Name = 'Sample Worksheet'
+	# For each row in the data set
+	@data.each_with_index do |row, r|
+		# For each field in the row
+		row.each_with_index do |field, c|
+				# Write the data to the Worksheet
+				ws.Cells(r+1, c+1).Value = field.to_s
+		end
+	end
+	# Save the workbook
+#	wb.SaveAs(c:\\ruby_code\\excel\\#{name}.xls")
+	wb.SaveAs('c:\temp\workbook.xls')
+	# Close the workbook
+	wb.Close
+	# Quit Excel
+	xl.Quit
+end
+
+write_to_spreadsheet('test')
+
+hazard 'hot water',
+'failure of water heater',
+'failure of sterile connector'
+
+hazard 'cold water',
+'failure of water heater',
+'failure of sterile connector'
+
+hazard 'acid',
+'failure of dialyser',
+'failure of cartridge'
+
+hazard     'alkaline',
+'failure of dialyser',
+'failure of cartridge'
+
+hazard     'high-pressure air',
+'failure of hydraulic system',
+'failure of valve'
+
+hazard     'air',
+'failure of bubble sensor',
+'failure of bubble trap',
+'failure of venous needle port'
+
+hazard     'broken dialyser fibres',
+'failure of dialyser',
+'physical damage to dialyser'
+
+hazard     'bacteria',
+'bacteria entry via drain cup',
+'contaminated bicarb powder',
+'contaminated bicarb container',
+'contaminated acid',
+'contaminated water',
+'contaminated saline',
+'re-used cartridge',
+'re-used blood line',
+'dirty needle'
+
+hazard     'clotted blood',
+'failure of thrombus trap',
+'mains supply failure',
+'power-supply failure',
+'peristaltic pump failure'
+
+hazard     'venous needle falling out of arm',
+'patient movement',
+'high-pressure in blood line',
+'over-taught blood line',
+'failed attachment tape',
+
+hazard     'venous line becoming damaged',
+'patient laying on needle line',
+'high-pressure in blood line',
+'action of venous clamp',
+'line construction failure',
+
+hazard     'venous needle becoming blocked',
+'blood clot blockage',
+'foreign body blockage'
+
+hazard     'blockage in dialyser and associated tubes',
+'foreign body blockage',
+'failure of dialyser
+
+hazard     'faulty venous clamp'
+hazard     'faulty priming drain'
+hazard     'faulty needle port'
+hazard     'faulty venous clamp / pierced pipe'
+hazard     'broken bubble sensor'
+hazard     'broken blood sensor'
+hazard     'broken cartridge pressure sensor'
+hazard     'broken bubble trap'
+hazard     'broken dialyser'
+hazard     'broken heparin syringe'
+hazard     'syphoning caused by broken bladder'
+hazard     'live conduction via faulty earth circuit of power supply'
+hazard     'Lightening strike to localised earth'
+hazard     'Static to earth'
+hazard     'Buildup of static within dialyser'
+hazard     'faulty peristaltic pump power supply'
+hazard     'faulty pressure sensor power supply'
+hazard     'faulty blood sensor'
+hazard     'faulty valve solenoid'
+hazard     'faulty pump solenoid'
+hazard     'excessive current induced into conductivity sensor'
+hazard     'faulty user i/o'
+hazard     'faulty RO water supply'
+hazard     'drain discharge coming into contact with electrical source'
+
+#Blood imbalance (volume) due to...
+
+hazard     'faulty Ultra-Filtration Pump'
+hazard     'faulty flow balancer'
+hazard     'faulty dialyser'
+hazard     'incorrect acid mix'
+hazard     'peristaltic pump slipping'
+hazard     'peristaltic pump running too fast'
+hazard     'peristaltic pump running too slow'
+hazard     'water in venous line'
+hazard     'air in venous line'
+hazard     'saline in arterial line'
+hazard     'faulty pressure sensor'
+hazard     'faulty blood sensor'
+hazard     'faulty bubble sensor'
+hazard     'blood leak'
+hazard     'faulty de-aerator'
+hazard     'Acid entering blood circuit'
+hazard     'Bicarb entering blood circuit'
+hazard     'bacteria entering blood circuit'
+hazard     'toxins entering blood circuit'
+hazard     'dirty or re-used cartridge'
+hazard     'dirty needles or tubing'
+hazard     'faulty RO water supply'
+hazard     'faulty endotoxin filter'
+hazard     'drain entering blood circuit'
+hazard     'contamination entry via the drain cup'
+hazard     'faulty acid mix'
+hazard     'bicarb depletion'
+hazard     'acid depletion'
+hazard     'bacteria entering needle port'
+hazard     'bacteria entering saline tube port'
+hazard     'bacteria entering faulty dialyser'
+hazard     'bacteria entering epo needle port'
+hazard     'bacteria entering priming drain'
+hazard     'bacteria entering faulty bubble sensor'
+hazard     'bacteria entering faulty blood sensor'
+hazard     'bacteria entering faulty pressure sensor'
+hazard     'bacteria entering faulty bubble trap'
+hazard     'bacteria entering dialysate sample port'
+hazard     'bacteria entering faulty sterile connector'
+hazard     'bacteria entering faulty blood leak sensor'
+hazard     'faulty endotoxin filter 2'
+hazard     'bacteria entering needle piercing points'
+hazard     'dirty needle'
+hazard     'contaminated bicarb concentrate'
+hazard     'contaminated saline'
+hazard     'contaminated water'
+hazard     'incorrect acidity acid mix'
+
+#Explosion of water boiler due to...
+
+hazard     'faulty boiler'
+hazard     'faulty water heater control causing water temperature to rise too high'
+hazard     'faulty RO water supply'
+hazard     'blocked connection between water pump and cartridge'
+hazard     'drain blockage'
+
+#Fire due to...
+
+hazard     'electric motor failure'
+hazard     'pump failure'
+hazard     'solenoid failure'
+hazard     'power supply failure'
+hazard     'boilure failure'
+hazard     'wiring failure'
+
+#Damage to user by unit falling ...
+
+hazard     'patient attachment to unit pulls unit over'
+hazard     'broken wheel/leg/stand'
+hazard     'weight of concentrates or saline causes mis-balance'
+hazard     'mains supply lead is tripped over causing unit to fall'
+hazard     'pressure of user touch on user controls pushes unit over'
+
+#Poisoning of user by oral intake...
+
+hazard     'ingestion of acid concentrate'
+hazard     'ingestion of bicarbonate preparation'
+hazard     'ingestion of heparin'
+hazard     'ingestion of drain substance'
+
+#Harm to user due to mis-diagnosis and subsequent mis-treatment...
+
+#Harm to user due to biocompatibility...'
+
+hazard     'faulty line-set'
+hazard     'faulty dialyser'
+hazard     'faulty needle'
+hazard     'contaminated saline'
+
+#Damage to associated software
+
+#Damage to associated equipment
+
+#Damage to environment due to…
+
+hazard     'drain of chemicals through household-waste system'
+hazard     'disposal of throw-away physical components'
+

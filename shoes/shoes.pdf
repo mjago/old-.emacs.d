@@ -1,0 +1,1113 @@
+%PDF-1.3
+%«Ïè¢
+1 0 obj
+<</Type/Font/Subtype/Type1/Name/F1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>
+endobj
+2 0 obj
+<</Type/Font/Subtype/Type1/Name/F2/BaseFont/Helvetica-Bold/Encoding/WinAnsiEncoding>>
+endobj
+3 0 obj
+<</Type/Font/Subtype/Type1/Name/F3/BaseFont/Helvetica-Oblique/Encoding/WinAnsiEncoding>>
+endobj
+4 0 obj
+<</Type/Font/Subtype/Type1/Name/F4/BaseFont/Helvetica-BoldOblique/Encoding/WinAnsiEncoding>>
+endobj
+5 0 obj
+<</Length 6204>>
+stream
+BT 1 0 0 1 72 762 Tm
+/F1 10 Tf 0 0 0 rg (require)Tj
+( )Tj
+0.498 0 0.498 rg ('yaml')Tj
+0 -12.0 TD
+T*
+/F2 10 Tf 0 0 0.498 rg (class)Tj
+( )Tj
+0 0 1 rg (EmacsTrainer)Tj
+T*
+(  )Tj
+T*
+(  )Tj
+0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (initialize)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_strokes)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf (YAML)Tj
+/F2 10 Tf (::)Tj
+/F1 10 Tf (load_file)Tj
+/F2 10 Tf (\()Tj
+/F1 10 Tf (File)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (expand_path)Tj
+/F2 10 Tf (\()Tj
+/F1 10 Tf (File)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (join)Tj
+/F2 10 Tf (\()Tj
+/F1 10 Tf (File)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (dirname)Tj
+/F2 10 Tf (\()Tj
+0 0 0.498 rg (__FILE__)Tj
+0 0 0 rg (\),)Tj
+/F1 10 Tf 0.498 0 0.498 rg ('keystrokes.yml')Tj
+/F2 10 Tf 0 0 0 rg (\)\)\))Tj
+T*
+(    )Tj
+/F3 10 Tf 0 0.498 0 rg (#~ @key_strokes = {)Tj
+T*
+(    )Tj
+(#~ :recover_a_file_lost_by_a_system_crash =>)Tj
+T*
+(    )Tj
+(#~ ['alt x','r','e','c','o','v','e','r','-','f','i','l','e'])Tj
+T*
+(    )Tj
+(#~ })Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:open_file)Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@key_pressed)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ("")Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@key_stroke_index)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@count)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@actual_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ("")Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@score)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@tests_taken)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+(  )Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (decode_key)Tj
+0 0 0 rg (\()Tj
+/F1 10 Tf (key)Tj
+/F2 10 Tf (\))Tj
+T*
+(    )Tj
+0 0 0.498 rg (if)Tj
+( )Tj
+/F1 10 Tf 0 0 0 rg (key)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (class)Tj
+( )Tj
+/F2 10 Tf (==)Tj
+( )Tj
+/F1 10 Tf (Symbol)Tj
+T*
+(      )Tj
+0.690 0 0.502 rg (@actual_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf (key)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (to_s)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (gsub)Tj
+/F2 10 Tf (\()Tj
+/F1 10 Tf 0.498 0 0.498 rg ('_')Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+/F1 10 Tf 0.498 0 0.498 rg (' ')Tj
+/F2 10 Tf 0 0 0 rg (\))Tj
+T*
+(      )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@actual_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (gsub!)Tj
+/F2 10 Tf (\()Tj
+/F1 10 Tf 0.498 0 0.498 rg ('alt')Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+/F1 10 Tf 0.498 0 0.498 rg ('Alt')Tj
+/F2 10 Tf 0 0 0 rg (\))Tj
+T*
+(    )Tj
+0 0 0.498 rg (else)Tj
+T*
+(      )Tj
+(if)Tj
+( )Tj
+/F1 10 Tf 0 0 0 rg (key)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (class)Tj
+( )Tj
+/F2 10 Tf (==)Tj
+( )Tj
+/F1 10 Tf (Symbol)Tj
+T*
+(        )Tj
+0.690 0 0.502 rg (@actual_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf (key)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (to_s)Tj
+T*
+(      )Tj
+/F2 10 Tf 0 0 0.498 rg (else)Tj
+T*
+(        )Tj
+(case)Tj
+( )Tj
+/F1 10 Tf 0 0 0 rg (key)Tj
+/F2 10 Tf ([)Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+/F2 10 Tf 0 0 0 rg (])Tj
+T*
+(        )Tj
+0 0 0.498 rg (when)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (..)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (26)Tj
+( )Tj
+T*
+(          )Tj
+0.690 0 0.502 rg (@actual_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ("Ctrl )Tj
+/F2 10 Tf 0 0 0 rg (#{\()Tj
+/F1 10 Tf 0.498 0 0.498 rg ('a')Tj
+/F2 10 Tf 0 0 0 rg ([)Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+/F2 10 Tf 0 0 0 rg (])Tj
+( )Tj
+(+)Tj
+( )Tj
+/F1 10 Tf (key)Tj
+/F2 10 Tf ([)Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+/F2 10 Tf 0 0 0 rg (])Tj
+( )Tj
+(-)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+/F2 10 Tf 0 0 0 rg (\).)Tj
+/F1 10 Tf (chr)Tj
+/F2 10 Tf (})Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+T*
+(        )Tj
+/F2 10 Tf 0 0 0.498 rg (when)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (32)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (..)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (126)Tj
+T*
+(          )Tj
+0.690 0 0.502 rg (@actual_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+/F2 10 Tf 0 0 0 rg (#{\()Tj
+/F1 10 Tf (key)Tj
+/F2 10 Tf ([)Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+/F2 10 Tf 0 0 0 rg (]\).)Tj
+/F1 10 Tf (chr)Tj
+/F2 10 Tf (})Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+T*
+(        )Tj
+/F2 10 Tf 0 0 0.498 rg (else)Tj
+T*
+(          )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@actual_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf (key)Tj
+/F2 10 Tf ([)Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+/F2 10 Tf 0 0 0 rg (])Tj
+T*
+(        )Tj
+0 0 0.498 rg (end)Tj
+T*
+(      )Tj
+(end)Tj
+T*
+(    )Tj
+(end)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@actual_key_stroke)Tj
+(  )Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (key_correct?)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@actual_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (to_s)Tj
+( )Tj
+/F2 10 Tf (==)Tj
+( )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_strokes)Tj
+/F2 10 Tf 0 0 0 rg ([)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (][)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@count)Tj
+/F2 10 Tf 0 0 0 rg (].)Tj
+/F1 10 Tf (to_s)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (sequence_complete?)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@count)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (+)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (==)Tj
+( )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_strokes)Tj
+/F2 10 Tf 0 0 0 rg ([)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (].)Tj
+/F1 10 Tf (size)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+(   )Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (next_key)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@count)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (+=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+ET
+endstream
+endobj
+6 0 obj
+<</Length 4493>>
+stream
+BT 1 0 0 1 72 762 Tm
+/F1 10 Tf 0 0.498 0.498 rg (  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+0 -12.0 TD
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (repeat_key)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@count)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (next_sequence)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_stroke_index)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (+=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+T*
+(    )Tj
+0.690 0 0.502 rg (@key_stroke_index)Tj
+(  )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+( )Tj
+/F2 10 Tf 0 0 0.498 rg (if)Tj
+( )Tj
+0 0 0 rg (\()Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_stroke_index)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (>=)Tj
+( )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_strokes)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (size)Tj
+/F2 10 Tf (\))Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_strokes)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (keys)Tj
+/F2 10 Tf ([)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_stroke_index)Tj
+/F2 10 Tf 0 0 0 rg (])Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@count)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (key_stroke)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@key_strokes)Tj
+/F2 10 Tf 0 0 0 rg ([)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (])Tj
+T*
+(  )Tj
+0 0 0.498 rg (end)Tj
+T*
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (next_guess)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+/F2 10 Tf 0 0 0 rg (#{)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (to_s)Tj
+/F2 10 Tf (})Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(  )Tj
+T*
+(  )Tj
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   )Tj
+T*
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (def)Tj
+( )Tj
+0 0.498 0.498 rg (correct_guess_message)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+/F2 10 Tf 0 0 0 rg (#{)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (to_s)Tj
+/F2 10 Tf (})Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(  )Tj
+T*
+(  )Tj
+(def)Tj
+( )Tj
+0 0.498 0.498 rg (incorrect_guess_message)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+/F2 10 Tf 0 0 0 rg (#{)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@expected_key_stroke)Tj
+/F2 10 Tf 0 0 0 rg (.)Tj
+/F1 10 Tf (to_s)Tj
+/F2 10 Tf (})Tj
+/F1 10 Tf 0.498 0 0.498 rg ( is wrong! Try ")Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(  )Tj
+T*
+(  )Tj
+T*
+(  )Tj
+(def)Tj
+( )Tj
+0 0.498 0.498 rg (display_correct_keystroke)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+/F2 10 Tf 0 0 0 rg (#{)Tj
+/F1 10 Tf (key_stroke)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (join)Tj
+/F2 10 Tf (\()Tj
+/F1 10 Tf 0.498 0 0.498 rg (' - ')Tj
+/F2 10 Tf 0 0 0 rg (\)})Tj
+/F1 10 Tf 0.498 0 0.498 rg (")Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(  )Tj
+T*
+(  )Tj
+(def)Tj
+( )Tj
+0 0.498 0.498 rg (score)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@tests_taken)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (+=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+T*
+(    )Tj
+0.498 0 0.498 rg (")Tj
+/F2 10 Tf 0 0 0 rg (#{)Tj
+/F1 10 Tf 0.690 0 0.502 rg (@score)Tj
+/F2 10 Tf 0 0 0 rg (})Tj
+/F1 10 Tf 0.498 0 0.498 rg (-)Tj
+/F2 10 Tf 0 0 0 rg (#{\()Tj
+/F1 10 Tf 0.690 0 0.502 rg (@tests_taken)Tj
+/F2 10 Tf 0 0 0 rg (\)})Tj
+/F1 10 Tf 0.498 0 0.498 rg (\\n")Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(  )Tj
+T*
+(  )Tj
+(def)Tj
+( )Tj
+0 0.498 0.498 rg (increment_score)Tj
+T*
+(    )Tj
+/F1 10 Tf 0.690 0 0.502 rg (@score)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (+=)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (1)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(end)Tj
+T*
+T*
+T*
+/F3 10 Tf 0 0.498 0 rg (#   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   #   )Tj
+T*
+T*
+/F1 10 Tf 0 0 0 rg (Shoes)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (app)Tj
+/F2 10 Tf (\()Tj
+(  )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:title)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ("Emacs Trainer")Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+ET
+endstream
+endobj
+7 0 obj
+<</Length 7098>>
+stream
+BT 1 0 0 1 72 762 Tm
+/F2 10 Tf 0 0 0 rg (                )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+0 -12.0 TD
+(                )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:width)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (760)Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+T*
+(                )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:height)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (572)Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+T*
+(                )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:resizable)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+0 0 0.498 rg (false)Tj
+T*
+(                )Tj
+0 0 0 rg (\))Tj
+( )Tj
+0 0 0.498 rg (do)Tj
+T*
+(  )Tj
+/F1 10 Tf 0 0 0 rg (background)Tj
+( )Tj
+0.498 0 0.498 rg ("emacs.jpg")Tj
+T*
+(  )Tj
+0 0 0 rg (emacs)Tj
+( )Tj
+/F2 10 Tf (=)Tj
+( )Tj
+/F1 10 Tf (EmacsTrainer)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (new)Tj
+T*
+(  )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (next_sequence)Tj
+T*
+(  )Tj
+(para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (next_guess)Tj
+( )Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (slateblue)Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (5)Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:top)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (0)Tj
+T*
+(  )Tj
+0 0 0 rg (keypress)Tj
+( )Tj
+/F2 10 Tf 0 0 0.498 rg (do)Tj
+( )Tj
+0 0 0 rg (|)Tj
+/F1 10 Tf (k)Tj
+/F2 10 Tf (|)Tj
+T*
+(    )Tj
+T*
+(    )Tj
+/F3 10 Tf 0 0.498 0 rg (#~ para "\\n\\n k.to_s is #{k.to_s}")Tj
+T*
+(    )Tj
+(#~ para "\\n\\n k.class is #{k.class}")Tj
+T*
+(    )Tj
+(#~ para "\\n\\n k[0] is #{k[0]}")Tj
+T*
+(    )Tj
+/F1 10 Tf 0 0 0 rg (emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (decode_key)Tj
+( )Tj
+(k)Tj
+T*
+(    )Tj
+/F3 10 Tf 0 0.498 0 rg (#~ para "\\n\\n  decoded key is #{emacs.decode_key k}\\n \\n \\n")Tj
+T*
+(    )Tj
+/F2 10 Tf 0 0 0.498 rg (if)Tj
+( )Tj
+/F1 10 Tf 0 0 0 rg (emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (key_correct?)Tj
+T*
+(      )Tj
+/F3 10 Tf 0 0.498 0 rg (#~ para "\\nsequence_complete? = #{emacs.sequence_complete?}\\n")Tj
+T*
+(      )Tj
+/F2 10 Tf 0 0 0.498 rg (if)Tj
+( )Tj
+/F1 10 Tf 0 0 0 rg (emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (sequence_complete?)Tj
+T*
+(        )Tj
+(para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (correct_guess_message)Tj
+/F2 10 Tf (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (green)Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (5)Tj
+T*
+(        )Tj
+0 0 0 rg (para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (display_correct_keystroke)Tj
+/F2 10 Tf (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (green)Tj
+T*
+(        )Tj
+(para)Tj
+( )Tj
+0.498 0 0.498 rg (" is Correct!")Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (green)Tj
+T*
+(        )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (increment_score)Tj
+T*
+(        )Tj
+(para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (score)Tj
+/F2 10 Tf (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (700)Tj
+T*
+(        )Tj
+0 0 0 rg (emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (next_sequence)Tj
+( )Tj
+T*
+(        )Tj
+(para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (next_guess)Tj
+( )Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (slateblue)Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (5)Tj
+T*
+(      )Tj
+/F2 10 Tf 0 0 0.498 rg (else)Tj
+T*
+(        )Tj
+/F1 10 Tf 0 0 0 rg (emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (next_key)Tj
+T*
+(      )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(    )Tj
+(else)Tj
+T*
+(      )Tj
+/F1 10 Tf 0 0 0 rg (para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (incorrect_guess_message)Tj
+/F2 10 Tf (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (red)Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (5)Tj
+T*
+(      )Tj
+0 0 0 rg (para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (display_correct_keystroke)Tj
+/F2 10 Tf (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (black)Tj
+T*
+(      )Tj
+(para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (score)Tj
+/F2 10 Tf (,)Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (700)Tj
+T*
+(      )Tj
+0 0 0 rg (emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (repeat_key)Tj
+(  )Tj
+T*
+(      )Tj
+(para)Tj
+( )Tj
+(emacs)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (next_guess)Tj
+( )Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:weight)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0.498 0 0.498 rg ('bold')Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:stroke)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf (slateblue)Tj
+/F2 10 Tf (,)Tj
+( )Tj
+/F1 10 Tf 0.753 0.627 0.188 rg (:left)Tj
+( )Tj
+/F2 10 Tf 0 0 0 rg (=>)Tj
+( )Tj
+/F1 10 Tf 0 0.498 0.498 rg (5)Tj
+T*
+(    )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(    )Tj
+/F1 10 Tf 0 0 0 rg (slot)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (scroll_top)Tj
+( )Tj
+/F2 10 Tf (=)Tj
+( )Tj
+/F1 10 Tf (slot)Tj
+/F2 10 Tf (.)Tj
+/F1 10 Tf (scroll_max)Tj
+T*
+(  )Tj
+/F2 10 Tf 0 0 0.498 rg (end)Tj
+T*
+(end)Tj
+T*
+T*
+T*
+T*
+T*
+ET
+endstream
+endobj
+8 0 obj
+<</ProcSet[/PDF/Text]
+/Font<</F1 1 0 R/F2 2 0 R/F3 3 0 R/F4 4 0 R>> >>
+endobj
+9 0 obj
+<</Type/Page/Parent 12 0 R
+/MediaBox[ 0 0 595 842]
+/Contents 5 0 R
+/Resources 8 0 R
+>>
+endobj
+10 0 obj
+<</Type/Page/Parent 12 0 R
+/MediaBox[ 0 0 595 842]
+/Contents 6 0 R
+/Resources 8 0 R
+>>
+endobj
+11 0 obj
+<</Type/Page/Parent 12 0 R
+/MediaBox[ 0 0 595 842]
+/Contents 7 0 R
+/Resources 8 0 R
+>>
+endobj
+12 0 obj
+<</Type/Pages/Kids[
+9 0 R
+10 0 R
+11 0 R
+]/Count 3
+>>
+endobj
+13 0 obj
+<</Type/Catalog/Pages 12 0 R >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000015 00000 n 
+0000000111 00000 n 
+0000000212 00000 n 
+0000000316 00000 n 
+0000000424 00000 n 
+0000006678 00000 n 
+0000011221 00000 n 
+0000018369 00000 n 
+0000018455 00000 n 
+0000018557 00000 n 
+0000018660 00000 n 
+0000018763 00000 n 
+0000018832 00000 n 
+trailer
+<< /Size 14 /Root 13 0 R
+>>
+startxref
+18880
+%%EOF

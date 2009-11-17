@@ -1,0 +1,64 @@
+
+module Paths
+	
+	ROOT_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..','..'))
+	PRI_BASE_PATH = File.join(ROOT_PATH,'pri','lib','base')
+	PRI_COMMON_PATH = File.join(ROOT_PATH,'pri','lib','common')
+	PRI_TFT_PATH = File.join(ROOT_PATH,'pri','lib','tft')  
+	SEC_BASE_PATH = File.join(ROOT_PATH,'sec','lib','base')
+
+	DOCS_PATH = File.join(ROOT_PATH,'docs')
+	DOCS_LIB_PATH = File.expand_path(File.dirname(__FILE__))
+	DOCS_LIB_MODULES_PATH = File.join(DOCS_LIB_PATH,'modules')
+	DOCS_GRAPH_LIB_PATH = File.join(DOCS_LIB_PATH,'graph_lib')
+	DOCS_HTML_PATH = File.join(DOCS_PATH,'html')
+	DOCS_PRI_HTML_PATH = File.join(DOCS_HTML_PATH,'pri')
+	DOCS_SEC_HTML_PATH = File.join(DOCS_HTML_PATH,'sec')
+	DOCS_INCLUDES_PATH = File.join(DOCS_PATH,'includes')
+	DOCS_PRI_INCLUDES_PATH = File.join(DOCS_INCLUDES_PATH,'pri')
+	DOCS_SEC_INCLUDES_PATH = File.join(DOCS_INCLUDES_PATH,'sec')
+	DOCS_MODULES_PATH = File.join(DOCS_PATH,'modules')
+	DOCS_IMAGES_PATH = File.join(DOCS_PATH,'images')
+	DOCS_SCREENS_PATH = File.join(DOCS_LIB_PATH,'screens')
+	DOCS_DOX_SCREENS_PATH = File.join(DOCS_SCREENS_PATH,'dox')
+	DOCS_DOXYGEN_PATH = File.join(DOCS_PATH,'doxygen')
+	DOCS_DOXYGEN_LOGS_PATH = File.join(DOCS_DOXYGEN_PATH,'logs')
+	DOCS_CLASSIC_RDOC_HTML_PATH = File.join(DOCS_PATH,'html','rdoc','doc','classic')
+	DOCS_MAIN_STATE_MACHINE_PATH = File.join(DOCS_LIB_PATH,'main_state_machine')
+
+end
+
+if __FILE__ == $0
+
+ require 'test/unit'
+ include Paths
+	class TestDocHelper < Test::Unit::TestCase
+		def test_dir_existance
+			
+			assert(File.exist?( ROOT_PATH ))
+			assert(File.exist?( PRI_BASE_PATH ))
+			assert(File.exist?( PRI_COMMON_PATH ))
+			assert(File.exist?( SEC_BASE_PATH ))
+			
+			assert(File.exist?( DOCS_PATH ))
+			assert(File.exist?( DOCS_LIB_PATH ))
+			assert(File.exist?( DOCS_LIB_MODULES_PATH ))
+			assert(File.exist?( DOCS_GRAPH_LIB_PATH ))
+			assert(File.exist?( DOCS_HTML_PATH ))
+			assert(File.exist?( DOCS_PRI_HTML_PATH ))
+			assert(File.exist?( DOCS_SEC_HTML_PATH ))
+			assert(File.exist?( DOCS_INCLUDES_PATH ))
+			assert(File.exist?( DOCS_PRI_INCLUDES_PATH ))
+			assert(File.exist?( DOCS_SEC_INCLUDES_PATH ))
+			assert(File.exist?( DOCS_MODULES_PATH ))
+			assert(File.exist?( DOCS_IMAGES_PATH ))
+			assert(File.exist?( DOCS_SCREENS_PATH ))
+			assert(File.exist?( DOCS_DOX_SCREENS_PATH ))
+			assert(File.exist?( DOCS_DOXYGEN_PATH ))
+			assert(File.exist?( DOCS_DOXYGEN_LOGS_PATH ))
+			assert(File.exist?( DOCS_CLASSIC_RDOC_HTML_PATH ))
+			assert(File.exist?( DOCS_MAIN_STATE_MACHINE_PATH ))
+		end
+	end
+end
+

@@ -1,0 +1,22 @@
+#include "usart_hardware.h"
+#include "usart_configurator.h"
+#include "usart_putchar.h"
+
+void usart_hardware_init(void)
+{
+  usart_configure_usart_io();
+  usart_enable_periph_clock();
+  usart_reset();
+  usart_configur_mode();
+  usart_set_baud_rate_register();
+  usart_enable();
+}
+ 
+void usart_hardware_transmit_string(char * data)
+{
+  while(* data != NULL
+    {
+      usart_putchar(data++);
+    }
+)
+}

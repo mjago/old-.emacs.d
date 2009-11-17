@@ -1,0 +1,1 @@
+node :from_state, :transition!, :to_state

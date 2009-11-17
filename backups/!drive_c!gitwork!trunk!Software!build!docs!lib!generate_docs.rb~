@@ -1,0 +1,341 @@
+require File.expand_path(File.join(File.dirname(__FILE__), 'doc_helper.rb'))
+require "rake"
+
+@file_path = {}
+
+=begin rdoc
+=
+=end
+
+class BuildDocs
+	
+	include Paths
+	
+	def initialize
+		get_time_date
+		expand_paths
+		clean_html_files
+		#~ generate_ruby_documentation
+		generate_header_and_footer
+		generate_home_page_dox
+		generate_general_dox_files
+		generate_screen_dox_files
+		generate_module_dox_files
+		generate_module_toc
+		generate_screens_toc
+		generate_html
+		draw_state_machines	
+		generate_state_machine_toc
+		copy_module_artefacts
+		copy_state_machine_artefacts
+		copy_all_images
+		copy_all_graphs
+		copy_all_references
+		rename_homepage
+		if __FILE__ != $0
+			copy_all_to_server
+		end
+	end
+
+private
+
+=begin rdoc
+=
+=end
+
+	def get_time_date
+		require File.join(DOCS_LIB_PATH,'get_time_date')
+		puts "---> Formatting build time and date..."
+		@build_time = GetTimeDate.read 
+		puts "  build time = #{@build_time}"
+	end
+
+=begin rdoc
+=
+=end
+
+	def expand_paths
+		puts "---> Expanding Paths..."
+		@file_path = {
+			:html => DOCS_HTML_PATH,
+			:pri => DOCS_PRI_HTML_PATH,
+			:sec => DOCS_SEC_HTML_PATH
+		}
+		absolute_paths
+	end
+
+=begin rdoc
+=
+=end
+
+	def absolute_paths
+		@file_path.each_key do |key|
+			@file_path[key] = File.expand_path(@file_path[key])
+			puts "  '#{@file_path[key] }"
+		end	
+	end
+
+=begin rdoc
+=
+=end
+
+	def clean_html_files
+		puts "---> Generating New Local html folders..."
+		[:html,:pri,:sec].each do |d|
+			if File.exist? @file_path[d]
+				puts "  removing #{@file_path[d]}"
+				FileUtils.remove_dir @file_path[d],true				#remove directory
+			end
+			puts "  creating #{@file_path[d]}"
+			FileUtils.mkdir @file_path[d]											# ...and make fresh
+		end	
+	end
+
+=begin rdoc
+=
+=end
+
+	#Generate ruby documentation...
+	def generate_ruby_documentation
+		require File.join(DOCS_LIB_PATH,'generate_ruby_docs')
+		puts "---> Generating Ruby RDOC Documentation..."
+		if generate_ruby_docs != true
+			puts "!!ERROR GENERATING RUBY DOCUMENTATION!!"
+			exit 1
+		end
+	end
+
+=begin rdoc
+=
+=end
+
+	def generate_header_and_footer
+		require File.join(DOCS_LIB_PATH,'build_header_footer')
+		puts "---> Generating header and footer includes..."
+		hf = BuildHeaderFooter.new
+		hf.build(:header)
+		hf.build(:footer, @build_time)
+	end	
+
+=begin rdoc
+=
+=end
+
+	def generate_home_page_dox
+		require File.join(DOCS_LIB_PATH,'generate_home_page_dox')
+		puts "---> Generating Home Page Dox include..."
+		GenerateHomePageDox.new.build(@build_time)
+	end	
+
+=begin rdoc
+=
+=end
+
+	def generate_general_dox_files
+		require File.join(DOCS_LIB_PATH,'generate_general_dox_files')
+		puts "---> Generating General Dox Output..."
+		g = GenerateGeneralDox.new
+		g.generate_general_dox_files
+		g = nil
+	end
+
+=begin rdoc
+=
+=end
+
+	def generate_module_dox_files
+		require File.join(DOCS_LIB_MODULES_PATH,'generate_module_dox')
+		puts "---> Generating Module Dox Output..."
+		g = GenerateModuleDox.new
+		g.generate_module_dox
+		g = nil
+	end
+
+=begin rdoc
+=
+=end
+
+	# Generate dot files created in ruby for software modules...
+
+	def generate_module_toc
+	require File.join(DOCS_LIB_MODULES_PATH,'process_module_docs')
+		puts "---> generating module table-of-contents..."
+		module_docs = ProcessModuleDocs.new
+		module_docs.process(File.join(DOCS_HTML_PATH,'module_toc.html'))
+	end
+
+=begin rdoc
+=
+=end
+
+	def generate_screens_toc
+		require File.join(DOCS_SCREENS_PATH,'generate_screens_toc')
+		puts "---> generating screens table-of-contents..."
+		toc = GenerateScreensTOC.new
+		toc.process File.join(DOCS_HTML_PATH,'screens_toc.html')
+		toc = nil
+	end
+
+
+=begin rdoc
+=
+=end
+
+	# Generating screen pages...
+	
+	def generate_screen_dox_files
+		require File.join(DOCS_SCREENS_PATH,'parse_screen_links')
+		puts "---> Generating Screen dox Files..."
+		BuildScreensDocumentationPage.new
+	end
+
+=begin rdoc
+=
+=end
+
+	# Generating html files with doxygen...
+	
+	def generate_html
+		require File.join(DOCS_LIB_PATH,'generate_html_files')
+		puts "---> Generating html files ..."
+		gh = GenerateHtml.new(:no_dot, :no_svn_revisions)
+		if gh.generate_html_files != true
+			puts "!!ERROR GENERATING HTML FILES!!"
+			exit 1
+		end
+	  gh = nil
+	end
+
+
+=begin rdoc
+=
+=end
+
+	# Draw state machines...
+	
+	def draw_state_machines
+		require File.join(DOCS_MAIN_STATE_MACHINE_PATH ,'main_state_machine')
+		puts "---> Drawing State-Machines		..."
+		MainStateMachine.new.draw
+	end
+
+=begin rdoc
+=
+=end
+
+	# generate_state_machine_toc...
+	
+	def generate_state_machine_toc
+		require File.join(DOCS_MAIN_STATE_MACHINE_PATH ,'generate_state_machine_toc')
+		puts "---> Generating state machine toc		..."
+		GenerateStateMachineTOC.new.process(File.join(DOCS_HTML_PATH,'state_machine_toc.html'))
+	end
+
+=begin rdoc
+=
+=end
+
+	def copy_module_artefacts
+		require File.join(DOCS_LIB_PATH,'copy_module_artefacts')
+		puts "---> Copying Module Artefacts..."
+		CopyModuleArtefacts.new.process
+	end
+	
+=begin rdoc
+=
+=end
+
+	def copy_state_machine_artefacts
+		require File.join(DOCS_LIB_PATH,'copy_state_machine_artefacts')
+		puts "---> Copying State-Machine Artefacts..."
+		CopyStateMachineArtefacts.new.process
+	end
+	
+=begin rdoc
+=
+=end
+
+	def copy_all_images
+		require File.join(DOCS_LIB_PATH,'copy_images')
+		puts "---> Copying Images..."
+		if copy_images != true
+			puts "!!ERROR COPYING IMAGES!!"
+			exit 1
+		end
+	end
+
+=begin rdoc
+=
+=end
+
+	# Copying Graphs...
+	
+	def copy_all_graphs
+		require File.join(DOCS_LIB_PATH,'copy_graphs')
+		puts "---> Copying Graphs..."
+		if copy_graphs != true
+			puts "!!ERROR COPYING GRAPHS!!"
+			exit 1
+		end
+	end
+
+=begin rdoc
+=
+=end
+
+	# Copying Referrences..
+
+	def copy_all_references
+		require File.join(DOCS_LIB_PATH,'copy_references')
+		puts "---> Copying References..."
+		if copy_references != true
+			puts "!!ERROR COPYING REFERRENCES!!"
+			exit 1
+		end
+	end
+
+=begin rdoc
+=
+=end
+
+	# rename homepage...
+
+	def rename_homepage
+		require File.join(DOCS_LIB_PATH,'rename_home_page')
+		puts "---> Renaming home page..."
+		if rename_home_page != true
+			puts "!!ERROR RENAMING HOME PAGE!!"
+			exit 1
+		end
+	end
+
+=begin rdoc
+=
+=end
+
+	# copy to server...
+
+	def copy_all_to_server
+		require File.join(DOCS_LIB_PATH,'copy_to_server')
+		puts "---> Copying Files to Server..."
+		if ENV['USERNAME'].downcase == "martyn"
+			if copy_to_server(:martyn, @file_path[:html]) != true
+				puts "!!ERROR COPYING FILES TO SERVER!!"
+				exit 1
+			end
+		else
+			if copy_to_server(:zi, @file_path[:html]) != true
+				puts "!!ERROR COPYING FILES TO SERVER!!"
+				exit 1
+			end
+		end
+	end
+end
+
+=begin rdoc
+=
+=end
+
+BuildDocs.new
+exit 0
+	

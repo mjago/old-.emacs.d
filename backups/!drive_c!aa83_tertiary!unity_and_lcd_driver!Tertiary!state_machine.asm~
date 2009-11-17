@@ -1,0 +1,100 @@
+	#include "macros.inc"
+	#include "flow_check.inc"
+	#include "p16f684.inc"
+	#include "state_machine.inc"
+
+	global stateMachine
+	global changeState
+	extern flowCheck
+	extern _c_mainState
+	extern _i_mainState
+	extern _c_lastState
+	extern _i_lastState
+	extern start_state						
+	extern debounce_timer_state						
+	extern check_key_up_state							
+	extern alarm_off_state								
+	extern check_power_on_state						
+	extern voltage_on_state								
+	extern voltage_on_wait_state							
+	extern check_inputs_state							
+	extern ensure_sw_off_state
+	extern check_alarm_condition_state
+	extern alarm_on_state									
+	extern voltage_off_state							
+	extern sleep_state		
+	extern _c_stateTimer
+	extern _i_stateTimer								
+
+	;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   
+	
+	stateMachine_CODE	CODE
+
+	stateMachine
+
+	movlw FLOW_STATE_MACHINE							; perform flow check
+	scall flowCheck
+	
+	bank0
+	  movlw 1
+	  movwf PCLATH	
+	  
+	movlw NULL_STATE													; check state within bounds...
+	subwf _c_mainState, W
+	btfsc STATUS, Z
+	goto break																;  ERROR state too low !!	
+	bcf STATUS, C
+	movf _c_mainState, W
+	sublw LAST_STATE
+	btfss STATUS, C	
+	goto break																;  ERROR state too high!!	
+	
+	movf _c_mainState, W
+	movwf PCL
+
+	break																				; shouldn't get here!
+	goto break		 														; shouldn't get here!
+
+	;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   
+
+	changeState
+	
+	bank0
+	movwf _c_mainState
+	bank1
+	movwf _i_mainState
+	comf  _i_mainState, F
+
+	bank0 				                        ; reset the state timer
+	clrf	_c_stateTimer
+	bank1
+	movlw	0xFF
+	movwf	_i_stateTimer
+
+	bank0
+	sret
+	
+	;   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   
+	
+	stateTable_CODE CODE ; state table is pinned at 0x100 to ensure computed goto result
+
+	stateTable
+
+	goto break
+	goto start_state						
+	goto debounce_timer_state						
+	goto check_key_up_state							
+	goto alarm_off_state								
+	goto check_power_on_state						
+	goto voltage_on_state								
+	goto voltage_on_wait_state							
+	goto check_inputs_state							
+	goto ensure_sw_off_state
+	goto check_alarm_condition_state
+	goto alarm_on_state									
+	goto voltage_off_state							
+	goto sleep_state										
+	goto break				; NEED goto break (range test) DON'T REMOVE !!
+
+	end
+	

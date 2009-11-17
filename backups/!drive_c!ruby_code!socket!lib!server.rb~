@@ -1,0 +1,50 @@
+
+
+CODE_PATH = '../code'
+
+require 'socket'               # Get sockets from stdlib
+
+def transfer_files(path,extension,c)
+  Dir[path + "/*.#{extension}"].each do |file|
+    puts "transfering file #{File.basename(file)}"
+    file_name = file
+    c.puts "filename = #{file_name}"
+    File.open(file_name) do |f|
+      f.readlines.each do |line|
+        c.puts line
+      end
+      c.puts '\0'
+    end
+  end
+end
+
+server = TCPServer.open(2000)  # Socket to listen on port 2000
+
+client = server.accept       # Wait for a client to connect
+client.puts(Time.now.ctime)  # Send the time to the client
+client.puts
+
+count = 0
+loop do
+  if count == 5
+    count = 0
+    Dir[CODE_PATH + "/*"].each do |dir|
+      puts dir
+      if File.directory?(dir)
+        %w{c h rb lkr}.each do |extension|
+          transfer_files(dir,extension,client)
+        end
+      end
+    end
+  end  
+  sleep 1
+  client.puts "tick"
+  STDOUT.puts "tick"
+  STDOUT.flush
+  count += 1
+end
+
+client.puts "Closing the connection. Bye!"
+client.close                 # Disconnect from the client
+
+

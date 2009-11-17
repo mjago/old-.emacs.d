@@ -1,0 +1,240 @@
+#include "P16f684.inc"
+#include "initialise.inc"
+#include "macros.inc"
+#include "state_machine.inc"
+
+	global start_state						
+	global debounce_timer_state						
+	global check_key_up_state							
+	global alarm_off_state								
+	global check_power_on_state						
+	global voltage_on_state								
+	global voltage_on_wait_state							
+	global check_inputs_state							
+	global ensure_sw_off_state
+	global check_alarm_condition_state
+	global alarm_on_state									
+	global voltage_off_state							
+	global sleep_state										
+	extern changeState
+	extern _c_secTimer
+	extern _i_secTimer
+	extern _c_stateTimer
+	extern _i_stateTimer
+
+	extern testHarness
+	extern testHarnessInfinite
+	
+mainStateMachineRoutines_CODE CODE
+
+start_state								; should never get here!!
+
+state_error
+	goto state_error
+
+;   .   .   .   	
+	
+debounce_timer_state							
+	bank0
+	movlw 1      						; wait for 1 sec
+	subwf _c_secTimer, W
+	btfsc STATUS, Z					; CHECK_KEY_UP_STATE when 1 sec
+	goto to_check_key_up_state
+	sret
+to_check_key_up_state
+	movlw CHECK_KEY_UP_STATE
+	scall changeState
+	sret
+
+;   .   .   .   	
+		
+check_key_up_state							
+	bank0
+	btfsc UpSwitch					; skip if up switch
+	goto test_key_down
+	movlw ALARM_OFF_STATE
+	scall changeState
+	sret
+test_key_down
+	movlw CHECK_POWER_ON_STATE
+	scall changeState
+	sret
+
+;   .   .   .   	
+	
+alarm_off_state								
+	bank0
+	bcf		PowerOn
+	bsf 	nBuzzerEnable				; Disable the buzzer so noone can signal alarm
+	bcf		BuzzerOut					; Also stop tertiary alarming
+	movlw 	SLEEP_STATE
+	scall 	changeState
+	sret
+
+;   .   .   .   	
+	
+check_power_on_state						
+	bank0
+	btfsc 	PowerSwitch					; skip if power switch
+	goto 	resume_sleep
+	bsf		PowerOn
+	bcf 	nBuzzerEnable				; Enable the buzzer so anyone can signal alarm
+	movlw 	VOLTAGE_ON_STATE
+	scall 	changeState
+	sret
+resume_sleep
+	movlw 	SLEEP_STATE
+	scall 	changeState
+	sret
+		
+;   .   .   .   	
+	
+voltage_on_state								
+	bank0
+	movlw	2				; wait for 1 sec
+	subwf	_c_stateTimer,W
+	btfsc	STATUS, Z					; when 1 sec
+	goto	change_state_to_volt_wait
+	sret
+change_state_to_volt_wait
+	movlw	VOLTAGE_ON_WAIT_STATE
+	scall	changeState
+	sret
+
+;   .   .   .   	
+; Check the power switch is still pressed	
+voltage_on_wait_state							
+
+	bank0
+;	btfsc PowerSwitch					; skip if power switch
+;	goto	resume_sleep_volt_wait
+	movlw	CHECK_INPUTS_STATE
+	scall	changeState
+	sret
+;resume_sleep_volt_wait
+;	movlw SLEEP_STATE
+;	scall changeState
+;	sret
+
+;   .   .   .   	
+;	Check to see if all the inputs are signalling a safe shutdown sequence
+check_inputs_state
+	bank0
+	btfss	SwitchOff							; Check that it is in the high state (this line toggles high low when ready for power off)
+	goto	change_to_check_alarm
+	goto	check_for_valid_switch_off
+change_to_check_alarm
+	movlw	CHECK_ALARM_CONDITION_STATE
+	scall	changeState
+	sret
+check_for_valid_switch_off
+	btfss	EnableOff
+	sret
+	btfsc	SwitchOffEnable
+	sret
+	movlw	ENSURE_SW_OFF_STATE
+	scall	changeState
+	sret
+
+;   .   .   .   	
+;	Now check that we are still signalling a safe shutdown sequence
+ensure_sw_off_state
+	bank0
+	movlw	1				; wait for 1 sec
+	subwf	_c_stateTimer,W
+	btfsc	STATUS, Z					; when 1 sec
+	goto	check_sw_off_still_off
+	sret
+check_sw_off_still_off
+	btfss	SwitchOff							; Check that it is in the high state (this line toggles high low when ready for power off)
+	goto	return_to_check_inputs
+	btfss	EnableOff
+	goto	return_to_check_inputs
+	btfsc	SwitchOffEnable
+	goto	return_to_check_inputs
+confirm_to_switch
+	; If it is the third check in this state then transition to turning off
+	movlw	VOLTAGE_OFF_STATE
+	scall	changeState
+	sret
+return_to_check_inputs
+	movlw	CHECK_INPUTS_STATE
+	scall	changeState
+	sret
+
+;   .   .   .   	
+;	To get here we must have had a signal that the system wants to power off without
+;	signalling a safe shutdown
+check_alarm_condition_state
+	bank0
+	; First check for a valid return to checking inputs
+	btfsc	SwitchOff							; Check that it is in the high state (this line toggles high low when ready for power off)
+	goto	continue_to_check_for_alarm
+	btfsc	EnableOff
+	goto	continue_to_check_for_alarm
+	btfss	SwitchOffEnable
+	goto	continue_to_check_for_alarm
+	movlw	CHECK_INPUTS_STATE					; At this point all pins are showing that they are in power on correctly state, must have been a spike?
+	scall	changeState	
+	sret
+continue_to_check_for_alarm
+	; Maybe it has turned into a valid shutdown
+	btfss	SwitchOff							; Check that it is in the high state (this line toggles high low when ready for power off)
+	goto	alarm_countdown
+	btfss	EnableOff
+	goto	alarm_countdown
+	btfsc	SwitchOffEnable
+	goto	alarm_countdown
+	movlw	ENSURE_SW_OFF_STATE
+	scall	changeState
+	sret
+	
+alarm_countdown
+	movlw	4								; wait for 4 sec
+	subwf	_c_stateTimer,W
+	btfsc	STATUS, Z						; when 1 sec
+	goto	check_still_in_alarm_condition
+	sret
+check_still_in_alarm_condition
+	movlw	ALARM_ON_STATE
+	scall	changeState
+	sret
+
+;   .   .   .   	
+	
+alarm_on_state									
+
+	bank0
+	bsf		BuzzerOut		; Turn on the alarm
+	movlw	VOLTAGE_OFF_STATE
+	scall	changeState
+	sret
+
+;   .   .   .   	
+	
+voltage_off_state	
+
+	bank0
+	bcf		PowerOn
+	movlw	SLEEP_STATE
+	scall	changeState
+	sret
+
+;   .   .   .   	
+	
+sleep_state										
+
+	sleep
+	bank0
+	clrf _c_secTimer					;reset secTimer CFR
+	bank1
+	clrf _i_secTimer
+	comf _i_secTimer, F
+	bank0
+	movlw DEBOUNCE_TIMER_STATE
+	scall changeState
+	sret
+	
+;   .   .   .   	
+	
+	end

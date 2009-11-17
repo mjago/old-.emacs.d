@@ -1,0 +1,1 @@
+link /usr/share/emacs/site-lisp/cedet-contrib/cedet-contrib-load.el

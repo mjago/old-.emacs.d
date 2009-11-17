@@ -1,0 +1,7 @@
+#ifndef _ADC_CONDUCTOR_H
+#define _ADC_CONDUCTOR_H
+
+void adc_conductor_init(void);
+
+#endif // _USART_CONDUCTOR_H
+

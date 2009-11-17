@@ -1,0 +1,515 @@
+#include "SDL/SDL.h"
+//~ #include "SDL_image.h"
+#include <stdlib.h>
+#include <memory.h>
+
+//   gcc c.c -lmingw32 -lSDLmain -lSDL
+
+enum {
+  SCREENWIDTH = 120,
+  SCREENHEIGHT = 160,
+  SCREENBPP = 0,
+  SCREENFLAGS = SDL_ANYFORMAT
+} ;
+
+#define RED 0xF800
+#define GREEN 0x07e0
+#define  BLUE 0x001f
+#define BLACK                              0x0000
+#define GREEN                              0x07e0
+#define DARK_GREEN                         0x01e0
+#define  BLUE                              0x001f
+#define WHITE                              0xffff
+#define  GREY                              0x5c05   // 0x7f7f//0x8210 //0xc718
+#define ORANGE                            0Xfa80    // 0xfc00
+#define FORE_GREY                         0x5C05
+#define NORMAL_FONT_HEIGHT                  0x0F
+#define MAX_DISPLAY_CHAR_RETRIES            0x05  // Max number of char write/verify attempts to display
+  #define TRUE                1
+  #define FALSE               0
+#define DISPLAYCHAR_ERROR                           1
+#define	SAFE_ALARM			0x4000
+#define HEADER_X_SIZE                       SCREEN_WIDTH
+#define LINE_SIZE                           SCREEN_WIDTH
+#define HEADER_Y_SIZE                       16
+
+void SetPixel ( SDL_Surface* pSurface , int x , int y , SDL_Color color ) ;
+SDL_Color GetPixel ( SDL_Surface* pSurface , int x , int y ) ;
+void convertColour(Uint16 colour);
+
+void fillXY(Uint8 xpos, Uint8 ypos, Uint8 xsize, Uint8 ysize);
+void clearDisplay(void);
+void displayChar(Uint8 character);
+Uint8 verifyChar(void);
+
+void _displayChar(Uint8 character);
+void systemAlarm(Uint8 alarm);
+void displayBitmap(Uint8 * filename,Uint8 xpos, Uint8 ypos);
+
+void testFillXY(void);
+void test_displayChar(void);
+void test__displayChar(void);
+void test_displayBitmap(void);
+
+Uint8 dispi;
+Uint8 dispj;
+Uint8 xPos;
+Uint8 yPos;
+Uint8 _xPos;
+Uint8 _yPos;
+Uint16 charBitmap[16]	= {
+	0x0009,	0x0000,	0x0000,	0x0800,	0x0800,	0x1400,	0x1400,	0x2200,
+	0x2200,	0x3e00,	0x4100,	0x4100,	0x0000,	0x0000,	0x0000,	0x0000
+};	
+
+Uint16 foreColour;
+Uint16 backColour;
+SDL_Surface * gSurface;
+SDL_Color gColor;
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup display
+  * setDisplayXY() sets the X and Y address for next display data access.
+  */
+
+void fillXY(Uint8 xpos, Uint8 ypos, Uint8 xsize, Uint8 ysize)
+{
+	convertColour(foreColour);
+  SDL_LockSurface ( gSurface ) ;
+  for (dispj=0; dispj < ysize; dispj++)               // for ysize number of pixels
+  {
+  //  setDisplayXY(xpos, ypos + dispi);               // set address to next line
+
+    for (dispi = 0; dispi < xsize; dispi++)             // for xsize number of pixels
+    {
+		SetPixel ( gSurface , dispi + xpos, dispj + ypos, gColor ) ;
+      //writeDataLCD(foreColour);                     // write foreground colour to LCD - static inc. address
+    }
+  }
+  SDL_UnlockSurface ( gSurface ) ;
+  SDL_UpdateRect ( gSurface , 0 , 0 , 0 , 0 ) ;
+}
+
+int main( int argc, char* argv[] )
+{
+  //initialize systems
+  SDL_Init ( SDL_INIT_VIDEO ) ;
+
+  //set our at exit function
+  atexit ( SDL_Quit ) ;
+
+  //create a window
+  SDL_Surface* pSurface = SDL_SetVideoMode ( SCREENWIDTH , SCREENHEIGHT ,
+                                             SCREENBPP , SCREENFLAGS ) ;
+	gSurface = pSurface;
+  //declare event variable
+  SDL_Event event ;
+
+	clearDisplay();
+
+	//testFillXY();
+	//~ test__displayChar();
+	test_displayBitmap();
+	test_displayChar();
+	
+  //message pump
+  for ( ; ; )
+  {
+    //look for an event
+    if ( SDL_PollEvent ( &event ) )
+    {
+      //an event was found
+      if ( event.type == SDL_QUIT ) break ;
+    }
+		
+		
+    //pick a random color
+    //~ SDL_Color color ;
+    //~ color.r = rand ( ) % 256 ;
+    //~ color.g = rand ( ) % 256 ;
+    //~ color.b = rand ( ) % 256 ;
+
+    //lock the surface
+    //~ SDL_LockSurface ( pSurface ) ;
+
+
+		
+    //plot pixel at random location
+    //~ SetPixel ( pSurface , rand ( ) % SCREENWIDTH , rand ( ) % SCREENHEIGHT , color ) ;
+
+    //unlock surface
+    //~ SDL_UnlockSurface ( pSurface ) ;
+
+    //update surface
+    //~ SDL_UpdateRect ( pSurface , 0 , 0 , 0 , 0 ) ;
+  }//end of message pump
+
+  //done
+  return ( 0 ) ;
+}
+
+void SetPixel( SDL_Surface* pSurface , int x , int y , SDL_Color color ) 
+{
+  //convert color
+  Uint32 col = SDL_MapRGB ( pSurface->format , color.r , color.g , color.b ) ;
+
+  //determine position
+  char* pPosition = ( char* ) pSurface->pixels ;
+
+  //offset by y
+  pPosition += ( pSurface->pitch * y ) ;
+
+  //offset by x
+  pPosition += ( pSurface->format->BytesPerPixel * x ) ;
+
+  //copy pixel data
+  memcpy ( pPosition , &col , pSurface->format->BytesPerPixel ) ;
+}
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup test
+  * GetPixel ( SDL_Surface* pSurface , int x , int y ) 
+  */
+
+SDL_Color GetPixel ( SDL_Surface* pSurface , int x , int y ) 
+{
+  SDL_Color color ;
+  Uint32 col = 0 ;
+
+  //determine position
+  char* pPosition = ( char* ) pSurface->pixels ;
+
+  //offset by y
+  pPosition += ( pSurface->pitch * y ) ;
+
+  //offset by x
+  pPosition += ( pSurface->format->BytesPerPixel * x ) ;
+
+  //copy pixel data
+  memcpy ( &col , pPosition , pSurface->format->BytesPerPixel ) ;
+
+  //convert color
+  SDL_GetRGB ( col , pSurface->format , &color.r , &color.g , &color.b ) ;
+  return ( color ) ;
+}
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup test
+  * convertColour()
+  */
+
+void convertColour(Uint16 colour)
+{
+	//gColor.r = 255;
+	gColor.r = (colour & 0xF800) >> 8;
+	gColor.r |= 0x07;
+	gColor.g = (colour & 0x7E0) >> 3;
+	gColor.g |= 0x03;
+	gColor.b = (colour & 0x1F) << 3;
+	gColor.b |= 0x07;
+}	
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup test
+  * clearDisplay()
+  */
+
+void clearDisplay(void)
+{
+	foreColour = WHITE;
+	fillXY(0, 0, 128, 160);
+}	
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup test
+  * testFillXY()
+  */
+
+void testFillXY(void)
+{
+	foreColour = RED;
+	fillXY(118, 140 , 10, 20);
+	
+	//~ foreColour = RED;
+	//~ fillXY(10, 10, 140, 10);
+
+	//~ foreColour = GREEN;
+	//~ fillXY(30, 10, 140, 10);
+	
+	//~ foreColour = BLUE;
+	//~ fillXY(50, 10, 140, 10);
+
+	//~ foreColour = DARK_GREEN;
+	//~ fillXY(70, 10, 140, 10);
+
+	//~ foreColour = GREY;
+	//~ fillXY(90, 10, 140, 10);
+	
+	//~ foreColour = ORANGE;
+	//~ fillXY(110, 10, 140, 10);
+}
+
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup display
+  * displayChar() draws character at current XY position
+  *   -  uses foreColour & backColour
+  *   -  xPos yPos set to start of next character on return
+  */
+
+void displayChar(Uint8 character)
+  {
+  static Uint8 retries;
+  static Uint8 returnVal;
+  retries=MAX_DISPLAY_CHAR_RETRIES;
+  _xPos=xPos;
+  _yPos=yPos;
+
+  do
+    {
+    xPos=_xPos;
+    yPos=_yPos;
+    _displayChar(character);
+
+    returnVal = verifyChar();
+     retries--;
+
+    if(retries==0)
+       {
+      systemAlarm(DISPLAYCHAR_ERROR);
+       }                                            // Retries exceeded. System Failure!
+
+    } while(returnVal==FALSE);
+
+                                                    // So far the displayed value has been displayed correctly and CRC result is stored in runningCRC16
+  //~ if (getSecLCDConfirm() == TRUE)
+    //~ {
+    //~ retries = secLCDLocation[secLCDFree];
+    //~ secLCDBuffer[secLCDFree][retries] = runningCRC16;
+    //~ secLCDLocation[secLCDFree]++;
+    //~ }
+  }
+
+//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup display
+  * verifyChar() reads back the character written to the display and verifies it is what was written
+  */
+
+Uint8 verifyChar(void)
+  {
+  static Uint16 tempData;                     // Temp storage for char data
+  static Uint8 width;                       // Holds width of this char
+  static Uint16 * ramPtr;
+
+  ramPtr = charBitmap;
+  //~ runningCRC16=CRC16_INITIAL_VALUE;
+
+  tempData = * ramPtr;                              // get width
+  ramPtr++;                                         // pointer to next data
+  width=tempData & 0xff;                            // get width of data from low byte of tempData
+
+  //~ if(sysAlarmRef != NO_SYSTEM_ALARM_ERROR)          // If currently within a system alarm...
+    //~ {                                               // don't verify character written to screen
+    //~ xPos+=width;                                    // (avoiding potential recursion)
+    //~ return TRUE;
+    //~ }
+
+  //~ for (dispi=0; dispi<15; dispi++)                  // for height of character (fixed at 16)
+    //~ {
+    //~ tempData = * ramPtr;                            // get next line of character data
+
+    //~ for(dispj=0; dispj<width; dispj++)              // for width of character
+      //~ {
+      //~ setDisplayXY(xPos + dispj, yPos + dispi );
+      //~ readDataLCD();                                // dummy read (required by LCD specification)
+      //~ if((tempData & 0x8000))
+        //~ {                                           // if MSB bit of tempData (bit data starts at MSB) is 1
+        //~ readDataLCD();
+
+        //~ ZI_TEST(1);
+
+        //~ if(readLCDData.it!= foreColour)
+          //~ {
+          //~ return FALSE;                             // incorrect pixel value read back
+          //~ }
+        //~ }
+      //~ else
+        //~ {
+        //~ if(getTransparentBackColour() == FALSE)
+          //~ {
+          //~ readDataLCD();
+          //~ if(readLCDData.it != backColour)
+            //~ {                                       // verify pixel as backColour
+            //~ return FALSE;
+            //~ }
+          //~ }
+        //~ else
+          //~ {
+                                                    //~ // Transparent background - nothing written so read nothing
+          //~ }
+        //~ }
+      //~ tempData<<=1;                                 // move next character pixel to MSB bit
+      //~ }
+                                                    //~ // Everything checked out OK so save value
+    //~ secLCDCheck[dispi*2] = ( (* ramPtr) & 0x00FF);
+    //~ secLCDCheck[(dispi*2)+1] = ( (* ramPtr) & 0xFF00) >> 8;
+    //~ ramPtr++;
+    //~ }
+                                                    //~ // Generate a CRC of the returned pixel data
+  //~ if (getSecLCDConfirm() == TRUE)
+    //~ {
+    //~ for (dispi=0; dispi < 30; dispi++) {
+      //~ crc16Data = secLCDCheck[dispi];
+      //~ crc16();
+    //~ }
+                                                    //~ // Clear memory
+    //~ for (dispi=0; dispi < 30; dispi++)
+      //~ {
+      //~ secLCDCheck[dispi] = 0x00;
+      //~ }
+    //~ }
+
+  xPos+=width;                                     // set x position to start of next character
+  return TRUE;
+  }
+
+	//  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .
+
+/**  \ingroup test
+  * _displayChar() performs the low-level work for routine displayChar()
+  */
+
+void _displayChar(Uint8 character)
+  {
+  static Uint16  tempData;                    // used to read display data from rom
+  static Uint8 width1;                              // width of character
+  static Uint8 height;
+  static Uint16 * ramPtr;
+
+
+  //testCharValidity(character);                      // Ensure within range
+ // readCharFromFlash(character);                     // fetch character from font in flash
+  ramPtr = charBitmap;
+  height = NORMAL_FONT_HEIGHT;
+
+  tempData = * ramPtr;                              // get first data in structure (width)
+  ramPtr++;                                         // pointer to next data
+  width1=tempData & 0xff;                           // get width of data from low byte of tempData
+
+  SDL_LockSurface ( gSurface ) ;
+	for (dispj=0; dispj < height; dispj++)              // for height of character (fixed at 16)
+    {
+//    setDisplayXY(xPos, yPos + dispi);               // set to start of next line
+    tempData = * ramPtr;                            // get next line of character data
+    ramPtr++;
+
+    for (dispi = 0; dispi < width1; dispi++)            // for width of character
+      {
+      if((tempData & 0x8000))                       // if MSB bit of tempData (bit data starts at MSB) is 1
+        {
+				convertColour(foreColour);
+				SetPixel( gSurface , dispi + xPos, dispj + yPos, gColor ) ;
+//        writeDataLCD(foreColour);                   // write pixel as foreground colour
+        }
+      else
+        {
+				convertColour(backColour);
+				SetPixel( gSurface , dispi + xPos, dispj + yPos, gColor ) ;
+        }
+      tempData<<=1;                                 // move next character pixel to MSB bit
+      }
+    }
+  SDL_UnlockSurface ( gSurface ) ;
+  SDL_UpdateRect ( gSurface , 0 , 0 , 0 , 0 ) ;
+}
+
+void test__displayChar(void)
+{
+	xPos = 10;
+	yPos = 20;
+	foreColour = BLUE;
+	backColour = WHITE;
+	_displayChar(0);
+	_displayChar(0);
+
+	xPos = 10;
+	yPos = 34;
+	foreColour = RED;
+	backColour = WHITE;
+	_displayChar(0);
+}
+
+void test_displayChar(void)
+{
+	xPos = 10;
+	yPos = 73;
+	backColour = WHITE;
+	foreColour = BLUE;
+	displayChar(0);
+	foreColour = GREEN;
+	displayChar(0);
+	foreColour = RED;
+	displayChar(0);
+	foreColour = BLACK;
+	displayChar(0);
+	foreColour = GREY;
+	displayChar(0);
+	foreColour = ORANGE;
+	displayChar(0);
+}
+	
+void systemAlarm(Uint8 alarm)
+{	
+}
+
+//~ void displayBitmap(Uint8 * filename)
+void displayBitmap(Uint8 * filename,Uint8 xpos, Uint8 ypos)
+{
+		SDL_RWops * file ;
+		SDL_Surface * image;
+		SDL_Rect rect = {0,0,0,0};
+		rect.x = xpos;
+		rect.y = ypos;
+		file = SDL_RWFromFile(filename, "rb");
+		xPos = 0;
+		yPos = 0;
+		image = SDL_LoadBMP_RW(file, 1); // 1 means the file will be automatically closed.
+		
+		//~ gSurface = SDL_LoadBMP_RW(file, 1); // 1 means the file will be automatically closed.
+		SDL_BlitSurface(image, NULL, gSurface,& rect);
+		SDL_UpdateRect(gSurface,0,0,SCREENWIDTH,SCREENHEIGHT);
+	
+		//~ while(SDL_BlitSurface(image, NULL, gSurface, NULL) == -2 )
+			//~ while(SDL_LockSurface(image) < 0)
+				//~ SDL_Delay(10);
+		//~ SDL_UnlockSurface(image);	
+}	
+
+void test_displayBitmap(void)
+{
+	//~ displayBitmap("screenshots/headers/error.bmp",0,0);
+	//~ displayBitmap("screenshots/headers/error1.bmp",0,HEADER_Y_SIZE);
+	//~ displayBitmap("screenshots/headers/running.bmp",0,HEADER_Y_SIZE * 2);
+	//~ displayBitmap("screenshots/headers/warning.bmp",0,HEADER_Y_SIZE * 3);
+	//~ displayBitmap("screenshots/headers/standby.bmp",0,HEADER_Y_SIZE * 4);
+	//~ displayBitmap("screenshots/headers/error.bmp",0,HEADER_Y_SIZE * 5);
+	//~ displayBitmap("screenshots/headers/error1.bmp",0,HEADER_Y_SIZE * 6);
+	//~ displayBitmap("screenshots/headers/running.bmp",0,HEADER_Y_SIZE * 7);
+	//~ displayBitmap("screenshots/headers/warning.bmp",0,HEADER_Y_SIZE * 8);
+	//~ displayBitmap("screenshots/headers/standby.bmp",0,HEADER_Y_SIZE * 9);
+	displayBitmap("screenshots/splashscreen/no_syringe.bmp",0,0);
+	SDL_Delay(1000);
+	displayBitmap("screenshots/splashscreen/red_lid.bmp",0,0);
+	SDL_Delay(1000);
+	displayBitmap("screenshots/splashscreen/red_syringe.bmp",0,0);
+	SDL_Delay(1000);
+	displayBitmap("screenshots/splashscreen/splash_cover_open.bmp",0,0);
+}	
+

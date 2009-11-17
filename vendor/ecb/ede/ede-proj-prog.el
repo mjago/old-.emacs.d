@@ -1,0 +1,1 @@
+link /usr/share/emacs/site-lisp/ede/ede-proj-prog.el

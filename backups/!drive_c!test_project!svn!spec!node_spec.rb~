@@ -1,0 +1,66 @@
+
+require File.
+  expand_path(File.
+              join(File.
+                   dirname(__FILE__),'..','state','build_state_machine'))
+
+require File.
+  expand_path(File.
+              join(File.
+                   dirname(__FILE__),'..','state','node'))
+
+TEST_STATE_DATA_PATH =
+  File.
+  expand_path(File.
+              join(File.
+                   dirname(__FILE__),'..','state','stateData','test_state_data.rb'))
+                   
+
+describe BuildStateMachine do
+  before do
+    @bsm = BuildStateMachine.new('test_state')
+  end
+  after do
+    @bsm = nil
+  end
+
+  describe 'node' do
+    it 'takes three arguments' do
+      @bsm.node(:from_state, :transition!, :to_state).should == true
+    end
+    
+    it 'writes node to data' do
+      $data.should == [[:from_state, :transition!, :to_state]]
+    end
+  end
+
+  describe 'parse_node' do
+    it 'opens the state data file' do
+      @bsm.parse_node(TEST_STATE_DATA_PATH).should == true# ["node :from_state, :transition!, :to_state"]
+    end
+  end
+
+  
+  
+#   it 'has a public method called parse' do
+#     pending
+#     @n.public_methods.include?('parse').should == true
+  #end
+
+  #describe 'parse' do
+  
+
+  
+#     it 'reads and returns the data file' do
+#       $data = @n.parse(TEST_STATE_DATA_PATH)
+#       puts $data
+#       $data.include?(["node :from_state, :transition, :to_state"]).should == true
+#     end
+    
+    
+    
+  #   end
+  
+  
+end
+
