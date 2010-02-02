@@ -202,7 +202,11 @@
                (setq ac-omni-completion-sources '(("\\.\\=" ac-source-rcodetools))))))
 
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-(global-set-key "\C-z" 'undo)
+
+;;(global-set-key "\C-z" 'undo)
+(require 'redo)
+(define-key global-map (kbd "M-z") 'redo)
+(define-key global-map (kbd "C-z") 'undo)
 
 ;; Change IRC user info...
 (setq rcirc-default-nick "rninja")
@@ -239,6 +243,12 @@
       flymake-start-syntax-check-on-newline nil)
 
 ;; (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+
+(global-unset-key "\M-l")
+(global-set-key "\M-l" 'goto-line)
+
+(setq make-backup-files nil) ; stop creating those backup~ files 
+(setq auto-save-default nil) ; stop creating those #auto-save# files
 
 ;;; init.el ends here
 

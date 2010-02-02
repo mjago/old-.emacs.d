@@ -1,7 +1,0 @@
-#ifndef _USART_CONDUCTOR_H
-#define _USART_CONDUCTOR_H
-
-void usart_conductor_init(void);
-
-#endif // _USART_CONDUCTOR_H
-

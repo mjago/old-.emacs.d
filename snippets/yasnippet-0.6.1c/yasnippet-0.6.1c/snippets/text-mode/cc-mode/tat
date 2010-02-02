@@ -1,0 +1,4 @@
+#name : tat
+# --
+  TEST_ASSERT_TRUE(${1:assertion}); 
+$0

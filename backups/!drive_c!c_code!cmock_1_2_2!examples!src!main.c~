@@ -1,9 +1,0 @@
-#include executer.h
-
-void main(void)
-{
-  executer_init();
-
-  while(executer_run());
-}
-

@@ -1,0 +1,12 @@
+#template for CMSIS doxygen header
+#name : dox
+# --
+/**
+ * @brief ${1:brief_name}
+ *
+ * @param ${2:params}
+ * @return ${3:return}
+ *
+ * ${4:description}
+ *
+ */

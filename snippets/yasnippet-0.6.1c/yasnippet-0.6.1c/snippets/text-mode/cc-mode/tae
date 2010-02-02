@@ -1,0 +1,4 @@
+#name : tae 
+# --
+  TEST_ASSERT_EQUAL(${1:test_against_this},${2:test_this});
+$0

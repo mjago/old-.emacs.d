@@ -1,0 +1,4 @@
+#name : taf
+# --
+  TEST_ASSERT_FALSE(${1:assertion});
+$0
