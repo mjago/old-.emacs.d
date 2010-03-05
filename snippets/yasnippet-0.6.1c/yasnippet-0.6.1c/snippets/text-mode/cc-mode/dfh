@@ -1,0 +1,16 @@
+#name : dfh (doxygen File Header)
+# --
+/** 
+ ******************************************************************************
+ * @file    ${1:File Name goes here!}
+ * @author  ${2:author goes here!}
+ * @version V${3:x.x.x goes here!}
+ * @date    ${4:dd}/${5:mm}/2010
+ * @brief   ${6:Brief Description goes here!} 
+ ******************************************************************************  
+ *
+ * <h2><center>&copy; COPYRIGHT 2010 Triteq Ltd</center></h2>
+ *
+ ******************************************************************************
+ **/
+$0

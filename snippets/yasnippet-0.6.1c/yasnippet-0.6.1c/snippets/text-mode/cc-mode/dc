@@ -1,0 +1,3 @@
+#name : dc (Doxygen Comment)
+# --
+/*!< ${1:Comment goes here}*/$0

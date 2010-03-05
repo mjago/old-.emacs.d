@@ -1,0 +1,13 @@
+#name : dh (doxygen header)
+# --
+/**
+ * @brief   ${1:Brief Description goes here!}
+ *
+ * @param ${2:Parameters Passed goes here!}
+ * @return ${3:Parameters Returned goes here!}
+ *
+ * ${4:General Description goes here!}
+ * 
+ */ 
+ 
+$0

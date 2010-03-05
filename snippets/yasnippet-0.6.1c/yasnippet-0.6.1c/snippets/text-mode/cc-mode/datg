@@ -1,0 +1,11 @@
+#name : datg (doxygen @addtogroup)
+# --
+/** @addtogroup ${1:group_name goes here (lowercase)} ${2:Group Title goes here} 
+  * @{
+  */
+
+$0*** Closing bracket follows ( !!DELETE THIS LINE!! )
+
+/** 
+  * @}  /* $1 $2 */
+  */
