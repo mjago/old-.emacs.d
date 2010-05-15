@@ -1,16 +1,8 @@
-;;; init.el --- Where all the magic begins
-;;
-;; Part of the Emacs Starter Kit
-;;
-;; This is the first thing to get loaded.
-;;
-;; "Emacs outshines all other editing software in approximately the
-;; same way that the noonday sun does the stars. It is not just bigger
-;; and brighter; it simply makes everything else vanish."
-;; -Neal Stephenson, "In the Beginning was the Command Line"
-
-;; Load path etc.
-
+;; list-colors-display --> display colour palette
+;; mark selection semi-permanently 
+(global-hi-lock-mode 1)
+;; C-x w h REGEX <RET> <RET> to highlight all occurances of REGEX, and
+;; C-x w r REGEX <RET>  to unhighlight them again.
 
 (setq dotfiles-dir (file-name-directory
                     (or (buffer-file-name) load-file-name)))
@@ -26,7 +18,42 @@
 ;; Colour Themes
 (add-to-list 'load-path (concat dotfiles-dir "/vendor"))
 (require 'color-theme)
+;;(color-theme-initialize)
+;; (color-theme-blue-mood)
+
+(defun color-theme ()
+  (interactive)
+  (color-theme-install
+   '(color-theme
+      ((background-color . "#0e52a0")
+      (background-mode . dark)
+      (border-color . "#1a1a1a")
+      (cursor-color . "#fce94f")
+      (foreground-color . "#ffffff")
+      (mouse-color . "black"))
+     (fringe ((t (:background "#1a1a1a"))))
+     (mode-line ((t (:foreground "#eeeeec" :background "#2e4a12"))))
+;;     (mode-line ((t (:foreground "#eeeeec" :background "#ff0000"))))
+     (region ((t (:background "#0eaa2f"))))
+     (font-lock-builtin-face ((t (:foreground "#d7e3ef"))))
+;;     (font-lock-comment-face ((t (:foreground "#a6ed3b"))))
+     (font-lock-comment-face ((t (:foreground "#D0D9D8"))))
+     (font-lock-function-name-face ((t (:foreground "#edd400"))))
+;;     (font-lock-keyword-face ((t (:foreground "#faeb00"))))
+     (font-lock-keyword-face ((t (:foreground "#E1D400"))))
+;;     (font-lock-string-face ((t (:foreground "#ff8ff3"))))
+     (font-lock-string-face ((t (:foreground "#FCE8FC"))))
+;;     (font-lock-type-face ((t (:foreground"#8ae234"))))
+     (font-lock-type-face ((t (:foreground"#f89254"))))
+     (font-lock-variable-name-face ((t (:foreground "#eeeeec"))))
+     (minibuffer-prompt ((t (:foreground "#bbd8f7" :bold t))))
+     (font-lock-warning-face ((t (:foreground "#FF0000" :bold t))))
+     (highlight ((t (:background "#130EA1" :foreground "#EEFFFF"))))
+     )))
+(provide 'color-theme)
+(require 'color-theme)
 (color-theme-initialize)
+(color-theme)
 (color-theme-blue-mood)
 
 (require 'setnu)
@@ -110,12 +137,12 @@
  ;; uncomment the next line if you want syntax highlighting                     
  (add-hook 'ruby-mode-hook 'turn-on-font-lock)
 
- (add-hook 'ruby-mode-hook 'whitespace-mode)
+ ;;(add-hook 'ruby-mode-hook 'whitespace-mode)
 
  (require 'show-wspace) ; Load this library.
 
 ; Install mode-compile to give friendlier compiling support!
-(autoload 'mode-compile "mode-compile"
+(autoload 'mode-compile "~/.emacs.d/mode-compile.elc"
    "Command to compile current buffer file based on the major mode" t)
 (global-set-key "\C-cc" 'mode-compile)
 (autoload 'mode-compile-kill "mode-compile"
@@ -139,7 +166,6 @@
 ;; (add-to-list 'load-path "C:/emacs-22.1/plugins/ecb-2.32")
 ;;(require 'ecb-autoloads)
 
-
 (require 'cc-mode)
 
 (global-set-key [(f9)] 'compile)
@@ -155,7 +181,11 @@
 (require 'auto-complete-ruby)
 (global-auto-complete-mode t)
 
+;; make C-k kill whole line...
 (setq kill-whole-line t)
+
+;; Mark displayed as inverse colour
+(setq-default transient-mark-mode t)
 
 (defun goto-next-line()
   (interactive)
@@ -165,7 +195,7 @@
   )
 (global-set-key (kbd "C-j") 'goto-next-line)
 
- (when (require 'auto-complete nil t)
+(when (require 'auto-complete nil t)
    (require 'auto-complete-yasnippet)
    (require 'auto-complete-ruby)
 ;;   (require 'auto-complete-css)
@@ -258,7 +288,6 @@
 ;;; easy bookmarks...
 
 ;;; TODO: Need to require this (require 'easy-bookmarks)
-
 (require 'cl)
 (require 'bookmark)
 (defvar af-current-bookmark nil)
@@ -321,3 +350,10 @@
 (global-set-key [(shift f2)]  'af-bookmark-cycle-reverse )
 (global-set-key [(control shift f2)]  'af-bookmark-clear-all )
 
+;disable backup
+(setq backup-inhibited t)
+
+;disable auto save
+(setq auto-save-default nil)
+
+(server-start)
