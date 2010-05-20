@@ -237,7 +237,9 @@
 (require 'redo)
 (define-key global-map (kbd "M-z") 'redo)
 (define-key global-map (kbd "C-z") 'undo)
-;;(define-key global-map (kbd "5") 'self-insert-command)
+
+;; mark (select) all on S-C-SPC
+(define-key global-map (kbd "S-C-SPC") 'mark-whole-buffer)
 
 ;; Shift F10 Open .emacs in buffer
 
