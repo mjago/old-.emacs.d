@@ -237,7 +237,18 @@
 (require 'redo)
 (define-key global-map (kbd "M-z") 'redo)
 (define-key global-map (kbd "C-z") 'undo)
+;;(define-key global-map (kbd "5") 'self-insert-command)
 
+;; Shift F10 Open .emacs in buffer
+
+;;save all buffers with F4 function key...
+(defun force-save-all ()
+    "Unconditionally saves all unsaved buffers."
+    (interactive)
+    (save-some-buffers t))
+
+(global-set-key [f4] 'force-save-all)
+ 
 ;; Change IRC user info...
 (setq rcirc-default-nick "rninja")
 (setq rcirc-default-user-name "rninja")
