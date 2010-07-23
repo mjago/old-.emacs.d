@@ -15,6 +15,9 @@
 (setq package-user-dir (concat dotfiles-dir "elpa"))
 (setq custom-file (concat dotfiles-dir "custom.el"))
 
+;;font size
+(set-face-attribute 'default nil :height 100)
+
 ;; Colour Themes
 (add-to-list 'load-path (concat dotfiles-dir "/vendor"))
 (require 'color-theme)
@@ -252,8 +255,8 @@
 (global-set-key [f4] 'force-save-all)
  
 ;; Change IRC user info...
-(setq rcirc-default-nick "rninja")
-(setq rcirc-default-user-name "rninja")
+(setq rcirc-default-nick "topazz")
+(setq rcirc-default-user-name "topazz")
 ;;(setq rcirc-default-user-full-name "")
       
 ;; Join these channels at IRC startup...
@@ -369,4 +372,18 @@
 ;disable auto save
 (setq auto-save-default nil)
 
+;; revert buffers
+(autoload 'revbufs "revbufs" (interactive) "Buffer Reverter.")
+
+;; I hate tabs!
+(setq-default indent-tabs-mode nil)
+
+;;smart-dash for C
+;;;(autoload 'smart-dash "smart-dash" (interactive) "Smart Dash Mode.")
+(require 'smart-dash)
+(add-hook 'c-mode-hook 'smart-dash-mode)
+(add-hook 'ruby-mode-hook 'smart-dash-mode)
+
 (server-start)
+
+(put 'upcase-region 'disabled nil)
