@@ -1,0 +1,7 @@
+#name : #include Triteq SI headers
+# --
+/* Triteq headers */
+#include "Types_Triteq.h"
+#include "defs.h"
+#include "label_IDs.h"
+

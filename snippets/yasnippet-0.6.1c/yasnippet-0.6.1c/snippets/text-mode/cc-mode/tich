@@ -1,0 +1,10 @@
+#name : #include TIC SI headers
+# --
+/* TIC headers */
+#include "TIC_init.h"
+#include "TIC_main.h"
+#include "TIC_state.h"
+#include "TIC_state_process.h"
+#include "TIC_systick.h"
+#include "TIC_variable.h"
+

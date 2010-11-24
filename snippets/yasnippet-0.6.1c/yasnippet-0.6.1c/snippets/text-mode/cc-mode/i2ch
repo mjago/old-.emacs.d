@@ -1,0 +1,8 @@
+#name : #include I2C SI headers
+# --
+/* I2C headers */
+#include "I2C_main.h"
+#include "I2C_state.h"
+#include "I2C_state_process.h"
+#include "I2C_variable.h"
+

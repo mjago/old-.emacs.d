@@ -1,0 +1,8 @@
+#name : #include ADC SI headers
+# --
+/* ADC headers */
+#include "ADC_main.h"
+#include "ADC_state.h"
+#include "ADC_state_process.h"
+#include "ADC_variable.h"
+

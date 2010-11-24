@@ -1,0 +1,17 @@
+#name : #include UIP SI headers
+# --
+/* UIP headers */
+#include "UIP.h"
+#include "UIP_data_store.h"
+#include "UIP_debug.h"
+#include "UIP_debug_labels.h"
+#include "UIP_debug_state_names.h"
+#include "UIP_drivers.h"
+#include "UIP_format_check.h"
+#include "UIP_main.h"
+#include "UIP_state.h"
+#include "UIP_state_process.h"
+#include "UIP_status.h"
+#include "UIP_variable.h"
+#include "rs232.h"
+
